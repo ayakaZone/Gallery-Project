@@ -1,0 +1,40 @@
+# 服务器配置
+server:
+  port: 8123 # 端口号
+  servlet:
+    # 上下文路径 例：localhost:8123/api
+    context-path: /api
+
+# spring 配置
+spring:
+  application:
+    name: yu-picture-backend # 项目名称
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver # 驱动类
+    url: jdbc:mysql://localhost:3306/yu_picture # 指定数据库的地址
+    username: root
+    password: 1234
+
+# MyBatis 配置
+mybatis-plus:
+  configuration:
+    # 驼峰命名
+    map-underscore-to-camel-case: false
+    # 仅在开发环境打印日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 逻辑删除字段
+      logic-delete-value: 1 # 字段已删除值：(默认为1)
+      logic-not-delete-value: 0 # 字段已删除值：(默认为0)
+knife4j:
+  enable: true
+  openapi:
+    title: 接口文档
+    version: 1.0
+    group:
+      default:
+        api-rule: package
+        api-rule-resources:
+          - com.yupi.yupicturebackend.controller
