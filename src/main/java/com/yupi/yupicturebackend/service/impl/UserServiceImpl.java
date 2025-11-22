@@ -1,26 +1,37 @@
 package com.yupi.yupicturebackend.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yupi.yupicturebackend.annotation.AuthCheck;
 import com.yupi.yupicturebackend.exception.BusinessException;
+import com.yupi.yupicturebackend.exception.ThrowUtils;
+import com.yupi.yupicturebackend.model.dto.user.UserLoginRequest;
 import com.yupi.yupicturebackend.model.dto.user.UserRegisterRequest;
 import com.yupi.yupicturebackend.model.entity.User;
 import com.yupi.yupicturebackend.model.enums.UserRoleEnum;
+import com.yupi.yupicturebackend.model.vo.LoginUserVO;
 import com.yupi.yupicturebackend.service.UserService;
 import com.yupi.yupicturebackend.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
-import static com.yupi.yupicturebackend.exception.ErrorCode.SYSTEM_ERROR;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import static com.yupi.yupicturebackend.Constant.UserConstant.ADMIN_ROLE;
+import static com.yupi.yupicturebackend.Constant.UserConstant.USER_LOGIN_STATE;
+import static com.yupi.yupicturebackend.exception.ErrorCode.*;
 
 /**
 * @author Ayaki
 * @description 针对表【user(用户)】的数据库操作Service实现
 * @createDate 2025-11-21 22:29:53
 */
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     implements UserService{
@@ -30,6 +41,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @param userRegisterRequest
      * @return
      */
+
     @Override
     public long userRegister(UserRegisterRequest userRegisterRequest) {
         // 校验参数
@@ -58,7 +70,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUserAccount(userRegisterRequest.getUserAccount()); // 账号
         user.setUserPassword(encryptPassword); // 加密后的密码
-        user.setUserName("默认用户_" + UUID.randomUUID());
+        user.setUserName("默认用户_" + UUID.randomUUID()); // 默认昵称
         user.setUserRole(UserRoleEnum.USER.getValue()); // 角色
 
         // 注册用户
@@ -67,6 +79,94 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(SYSTEM_ERROR, "注册失败，数据库异常");
         }
         return user.getId();
+    }
+
+    /**
+     * 用户登录
+     * @param userLoginRequest
+     * @param request
+     * @return
+     */
+    @Override
+    public LoginUserVO userLogin(UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        // 参数校验
+        if (ObjUtil.isEmpty(userLoginRequest)) {
+            throw new BusinessException(PARAMS_ERROR, "参数为空");
+        }
+        if (userLoginRequest.getUserAccount().length() < 4) {
+            throw new BusinessException(PARAMS_ERROR, "账号不能小于4位");
+        }
+        if (userLoginRequest.getUserPassword().length() < 8) {
+            throw new BusinessException(PARAMS_ERROR, "密码不能小于8位");
+        }
+        // 密码加密
+        String userPassword = userLoginRequest.getUserPassword();
+        String encryptPassword = getEncryptPassword(userPassword);
+        userLoginRequest.setUserPassword(encryptPassword);
+        // 查询数据库
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("userAccount", userLoginRequest.getUserAccount())
+                .eq("userPassword", userLoginRequest.getUserPassword());
+        User user = this.baseMapper.selectOne(userQueryWrapper);
+        if (user == null) {
+            log.info("user login failed, userAccount cannot match userPassword");
+            throw new BusinessException(PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        // Session 的用户登陆状态
+        request.getSession().setAttribute(USER_LOGIN_STATE, user);
+        // 用户脱敏
+        return this.getLoginUserVO(user);
+    }
+
+    /**
+     * 封装 UserVO
+     * @param user
+     * @return
+     */
+    @Override
+    public LoginUserVO getLoginUserVO(User user) {
+        return BeanUtil.copyProperties(user, LoginUserVO.class);
+    }
+
+    /**
+     * 获得当前登录用户
+     * @param request
+     * @return
+     */
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        // 从 Session 中获取当前登录用户
+        HttpSession session = request.getSession();
+        Object userObj = session.getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        // 校验
+        if (ObjUtil.isEmpty(user) || ObjUtil.isEmpty(user.getId())) {
+            throw new BusinessException(NOT_LOGIN_ERROR);
+        }
+        // 查询数据库（不一致性）
+        Long userId = user.getId();
+        user = this.getById(userId);
+        if (user == null) {
+            throw new BusinessException(NOT_LOGIN_ERROR);
+        }
+        return user;
+    }
+
+    /**
+     * 用户注销
+     * @param request
+     * @return
+     */
+    @Override
+    public boolean userLogout(HttpServletRequest request) {
+        // 校验
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (ObjUtil.isEmpty(userObj)) {
+            throw new BusinessException(OPERATION_ERROR, "未登录");
+        }
+        // 移除 Session 登陆状态
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return true;
     }
 
     /**
