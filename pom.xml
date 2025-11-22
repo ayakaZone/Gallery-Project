@@ -29,10 +29,16 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>3.5.14</version>
         </dependency>
-        <!-- jsqlparser 分页插件：https://baomidou.com/introduce/ -->
+        <!-- jsqlparser https://cloud.tencent.com/document/product/436/10199 -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-jsqlparser</artifactId>
+        </dependency>
+        <!-- 腾讯云 COS 对象存储 分页插件：https://baomidou.com/introduce/ -->
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>5.6.227</version>
         </dependency>
         <!-- hutool 工具库：https://doc.hutool.cn/pages/index/#%F0%9F%8D%8Amaven -->
         <dependency>
