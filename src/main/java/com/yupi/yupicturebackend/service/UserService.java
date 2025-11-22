@@ -1,6 +1,6 @@
 package com.yupi.yupicturebackend.service;
 
-import com.yupi.yupicturebackend.model.dto.UserRegisterRequest;
+import com.yupi.yupicturebackend.model.dto.user.UserRegisterRequest;
 import com.yupi.yupicturebackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 

@@ -2,7 +2,7 @@ package com.yupi.yupicturebackend.controller;
 
 import com.yupi.yupicturebackend.common.BaseResponse;
 import com.yupi.yupicturebackend.common.ResultUtils;
-import com.yupi.yupicturebackend.model.dto.UserRegisterRequest;
+import com.yupi.yupicturebackend.model.dto.user.UserRegisterRequest;
 import com.yupi.yupicturebackend.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
