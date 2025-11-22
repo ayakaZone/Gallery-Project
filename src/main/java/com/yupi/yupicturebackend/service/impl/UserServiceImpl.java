@@ -1,18 +1,20 @@
 package com.yupi.yupicturebackend.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.yupicturebackend.annotation.AuthCheck;
 import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.user.UserLoginRequest;
+import com.yupi.yupicturebackend.model.dto.user.UserQueryRequest;
 import com.yupi.yupicturebackend.model.dto.user.UserRegisterRequest;
 import com.yupi.yupicturebackend.model.entity.User;
 import com.yupi.yupicturebackend.model.enums.UserRoleEnum;
 import com.yupi.yupicturebackend.model.vo.LoginUserVO;
+import com.yupi.yupicturebackend.model.vo.UserVO;
 import com.yupi.yupicturebackend.service.UserService;
 import com.yupi.yupicturebackend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +24,10 @@ import org.springframework.util.DigestUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import static com.yupi.yupicturebackend.Constant.UserConstant.ADMIN_ROLE;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.yupi.yupicturebackend.Constant.UserConstant.USER_LOGIN_STATE;
 import static com.yupi.yupicturebackend.exception.ErrorCode.*;
 
@@ -119,13 +124,47 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
-     * 封装 UserVO
+     * 封装 LoginUserVO
      * @param user
      * @return
      */
     @Override
     public LoginUserVO getLoginUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
         return BeanUtil.copyProperties(user, LoginUserVO.class);
+    }
+
+    /**
+     * 封装 UserVO
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        return BeanUtil.copyProperties(user, UserVO.class);
+    }
+
+    /**
+     * 封装 List<UserVO>
+     *
+     * @param userList
+     * @return
+     */
+    @Override
+    public List<UserVO> getUserVOList(List<User> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        List<UserVO> userVOList = userList.stream()
+                .map(this::getUserVO)
+                .collect(Collectors.toList());
+        return userVOList;
     }
 
     /**
@@ -170,8 +209,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
+     * 用户分页查询条件
+     *
+     * @param userQueryRequest
+     * @return
+     */
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
+        // 校验
+        if (ObjUtil.isEmpty(userQueryRequest)) {
+            throw new BusinessException(PARAMS_ERROR, "查询参数为空");
+        }
+        // 查询条件对象
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        // 用户字段
+        Long id = userQueryRequest.getId();
+        String userAccount = userQueryRequest.getUserAccount();
+        String userName = userQueryRequest.getUserName();
+        String userProfile = userQueryRequest.getUserProfile();
+        String userRole = userQueryRequest.getUserRole();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
+        // 查询条件
+        return wrapper.eq(ObjUtil.isNotEmpty(id), "id", id)
+                .eq(StrUtil.isNotEmpty(userRole), "userRole", userRole)
+                .like(StrUtil.isNotEmpty(userAccount), "userAccount", userAccount)
+                .like(StrUtil.isNotEmpty(userName), "userName", userName)
+                .like(StrUtil.isNotEmpty(userProfile), "userProfile", userProfile)
+                .orderBy(StrUtil.isNotEmpty(sortField), sortOrder.equals("ascend"), sortField);
+    }
+
+    /**
      * 获取加密处理的密码
      */
+    @Override
     public String getEncryptPassword(String userPassword){
         // 加固密钥
         final String KEY = "yupi";

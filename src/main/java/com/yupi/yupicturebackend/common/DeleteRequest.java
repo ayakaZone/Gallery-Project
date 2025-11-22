@@ -1,10 +1,13 @@
 package com.yupi.yupicturebackend.common;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
  * 通用逻辑删除类
  */
+@Data
 public class DeleteRequest implements Serializable {
     /**
      * id

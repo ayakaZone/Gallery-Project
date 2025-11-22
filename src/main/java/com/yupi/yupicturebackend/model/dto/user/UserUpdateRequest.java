@@ -1,22 +1,15 @@
-package com.yupi.yupicturebackend.model.vo;
+package com.yupi.yupicturebackend.model.dto.user;
 
-import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
-/**
- * 脱敏用户
- * @TableName user
- */
 @Data
-public class LoginUserVO implements Serializable {
-
+public class UserUpdateRequest implements Serializable {
     /**
-     * ID
+     * 用户ID
      */
-    private Long id;
+    private long id;
 
     /**
      * 账号
@@ -42,21 +35,6 @@ public class LoginUserVO implements Serializable {
      * 用户角色：user/admin
      */
     private String userRole;
-
-    /**
-     * 编辑时间
-     */
-    private Date editTime;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     public static final long serialVersionUID = 1L;
 }
