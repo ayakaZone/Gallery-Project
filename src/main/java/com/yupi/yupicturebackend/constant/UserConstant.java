@@ -1,4 +1,4 @@
-package com.yupi.yupicturebackend.Constant;
+package com.yupi.yupicturebackend.constant;
 
 /**
  * 用户常量

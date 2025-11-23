@@ -15,6 +15,11 @@ spring:
     url: jdbc:mysql://localhost:3306/yu_picture # 指定数据库的地址
     username: root
     password: 1234
+  profiles:
+    active: local
+  servlet:
+    multipart:
+      max-file-size: 10MB
 
 # MyBatis 配置
 mybatis-plus:

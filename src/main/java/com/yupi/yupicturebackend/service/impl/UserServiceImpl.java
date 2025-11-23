@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.yupi.yupicturebackend.Constant.UserConstant.USER_LOGIN_STATE;
+import static com.yupi.yupicturebackend.constant.UserConstant.USER_LOGIN_STATE;
 import static com.yupi.yupicturebackend.exception.ErrorCode.*;
 
 /**
