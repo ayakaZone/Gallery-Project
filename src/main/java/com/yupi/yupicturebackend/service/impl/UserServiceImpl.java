@@ -8,6 +8,8 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yupi.yupicturebackend.exception.BusinessException;
+import com.yupi.yupicturebackend.exception.ErrorCode;
+import com.yupi.yupicturebackend.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.user.UserLoginRequest;
 import com.yupi.yupicturebackend.model.dto.user.UserQueryRequest;
 import com.yupi.yupicturebackend.model.dto.user.UserRegisterRequest;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.yupi.yupicturebackend.constant.UserConstant.ADMIN_ROLE;
 import static com.yupi.yupicturebackend.constant.UserConstant.USER_LOGIN_STATE;
 import static com.yupi.yupicturebackend.exception.ErrorCode.*;
 
@@ -248,6 +251,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         final String KEY = "yupi";
         // md5 加密算法
         return DigestUtils.md5DigestAsHex((KEY + userPassword).getBytes());
+    }
+
+    /**
+     * 判断是否是管理员
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public boolean isAdmin(User user) {
+        return user != null && user.getUserRole().equals(UserRoleEnum.ADMIN.getValue());
     }
 }
 
