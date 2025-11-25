@@ -14,6 +14,7 @@ import com.yupi.yupicturebackend.exception.BusinessException;
 import com.yupi.yupicturebackend.exception.ErrorCode;
 import com.yupi.yupicturebackend.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.picture.PictureQueryRequest;
+import com.yupi.yupicturebackend.model.dto.picture.PictureReviewRequest;
 import com.yupi.yupicturebackend.model.dto.picture.PictureUpdateRequest;
 import com.yupi.yupicturebackend.model.dto.picture.PictureUploadRequest;
 import com.yupi.yupicturebackend.model.entity.Picture;
@@ -35,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import static com.yupi.yupicturebackend.model.enums.PictureReviewStatusEnum.PASS;
 
 @RestController
 @RequestMapping("/picture")
@@ -62,16 +65,14 @@ public class PictureController {
         return ResultUtils.success(pictureTagCategory);
     }
 
-    /// 管理员接口
     /**
-     * 图片上传
+     * 图片上传 MultipartFile
      * @param multipartFile
      * @param pictureUploadRequest
      * @return
      */
     @PostMapping("/upload")
-    @AuthCheck(mustRole = "admin")
-    @ApiOperation("图片上传")
+    @ApiOperation("文件图片上传")
     public BaseResponse<PictureVO> uploadPicture(
             @RequestPart("file") MultipartFile multipartFile,
             PictureUploadRequest pictureUploadRequest,
@@ -79,6 +80,41 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
+    }
+
+    /**
+     * 图片上传 URL
+     * @param pictureUploadRequest
+     * @return
+     */
+    @PostMapping("/upload/url")
+    @ApiOperation("URL图片上传")
+    public BaseResponse<PictureVO> uploadPictureByUrl(
+            @RequestBody PictureUploadRequest pictureUploadRequest,
+            HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        PictureVO pictureVO = pictureService.uploadPicture(pictureUploadRequest.getFileUrl(), pictureUploadRequest, loginUser);
+        return ResultUtils.success(pictureVO);
+    }
+
+    /// 管理员接口
+
+    /**
+     * 图片校验
+     *
+     * @param pictureReviewRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/review")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @ApiOperation("管理员审核图片")
+    public BaseResponse<Boolean> doReviewPicture(@RequestBody PictureReviewRequest pictureReviewRequest, HttpServletRequest request) {
+        /// 校验
+        ThrowUtils.throwIf(ObjUtil.isEmpty(pictureReviewRequest), ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        pictureService.pictureReview(pictureReviewRequest, loginUser);
+        return ResultUtils.success(true);
     }
 
     /**
@@ -119,7 +155,7 @@ public class PictureController {
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @ApiOperation("管理员图片更新")
     public BaseResponse<Boolean> updatePicture(
-            @RequestBody PictureUpdateRequest pictureUpdateRequest) {
+            @RequestBody PictureUpdateRequest pictureUpdateRequest, HttpServletRequest request) {
         /// 校验
         ThrowUtils.throwIf(
                 ObjUtil.isEmpty(pictureUpdateRequest) || pictureUpdateRequest.getId() <= 0,
@@ -136,6 +172,8 @@ public class PictureController {
         Long id = pictureUpdateRequest.getId();
         Picture oldPicture = pictureService.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(oldPicture), ErrorCode.NOT_FOUND_ERROR);
+        // 补充审核参数
+        pictureService.fillReviewParams(picture, userService.getLoginUser(request));
         // 更新图片
         boolean result = pictureService.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -197,6 +235,8 @@ public class PictureController {
         int pageSize = pictureQueryRequest.getPageSize();
         /// 限制爬虫
         ThrowUtils.throwIf(pageSize > 20, ErrorCode.OPERATION_ERROR);
+        // 设置用户只能查询已过审的图片
+        pictureQueryRequest.setReviewStatus(PASS.getValue());
         // 分页查询
         Page<Picture> picturePage = pictureService.page(
                 new Page<>(current, pageSize),
@@ -221,6 +261,8 @@ public class PictureController {
         // 获取图片
         Picture picture = pictureService.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(picture), ErrorCode.NOT_FOUND_ERROR);
+        // 校验图片的审核状态
+        ThrowUtils.throwIf(!picture.getReviewStatus().equals(PASS.getValue()), ErrorCode.PARAMS_ERROR,"仅能获取已过审图片");
         // 转VO
         PictureVO pictureVO = PictureVO.objToVo(picture);
         return ResultUtils.success(pictureVO);
@@ -255,9 +297,11 @@ public class PictureController {
         ThrowUtils.throwIf(ObjUtil.isEmpty(oldPicture), ErrorCode.NOT_FOUND_ERROR);
         /// 仅用户本人和管理员可编辑
         User loginUser = userService.getLoginUser(request);
-        if (!oldPicture.getUserId().equals(loginUser.getId()) || !userService.isAdmin(loginUser)) {
+        if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        // 补充审核信息
+        pictureService.fillReviewParams(picture, loginUser);
         // 更新图片
         boolean result = pictureService.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
