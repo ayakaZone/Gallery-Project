@@ -6,6 +6,7 @@
 
     <resultMap id="BaseResultMap" type="com.yupi.yupicturebackend.model.entity.Picture">
         <id property="id" column="id"/>
+        <result property="thumbnailUrl" column="thumbnailUrl"/>
         <result property="url" column="url"/>
         <result property="name" column="name"/>
         <result property="introduction" column="introduction"/>
@@ -28,7 +29,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,url,name,introduction,category,tags,
+        id,thumbnailUrl,url,name,introduction,category,tags,
         picSize,picWidth,picHeight,picScale,picFormat,
         userId,createTime,editTime,updateTime,isDelete,
         reviewStatus,reviewMessage,reviewerId,reviewTime

@@ -1,5 +1,6 @@
 package com.yupi.yupicturebackend.manager.upload;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -12,7 +13,9 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
+import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 import com.yupi.yupicturebackend.config.CosClientConfig;
 import com.yupi.yupicturebackend.exception.BusinessException;
 import com.yupi.yupicturebackend.exception.ErrorCode;
@@ -79,6 +82,19 @@ public abstract class PictureUploadTemplate {
             PutObjectResult putObjectResult = cosManager.putPictureObject(uploadPath, file);
             // 解析文件数据
             ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
+            // 根据规则处理后的结果
+            ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
+            List<CIObject> objectList = processResults.getObjectList();
+            if (CollUtil.isNotEmpty(objectList)) {
+                CIObject webpObject = objectList.get(0);
+                // 缩略图默认为 webp格式
+                CIObject thumbnailObject = webpObject;
+                // 判断是否配置了缩略图
+                if (objectList.size() > 1) {
+                    thumbnailObject = objectList.get(1);
+                }
+                return buildResult(originFileName, webpObject, thumbnailObject);
+            }
             // todo 封装返回结果
             return buildResult(imageInfo, uploadPath, originFileName, file);
         } catch (Exception e) {
@@ -111,6 +127,33 @@ public abstract class PictureUploadTemplate {
      * @param inputSource
      */
     protected abstract void validPicture(Object inputSource);
+
+    /**
+     * 封装返回结果（带图片处理后）
+     * @param originFileName
+     * @param webpObject
+     * @return
+     */
+    private UploadPictureResult buildResult(String originFileName, CIObject webpObject, CIObject thumbObject) {
+        // 包装图片信息类
+
+        String format = webpObject.getFormat(); // 格式
+        int picWidth = webpObject.getWidth();   // 宽
+        int picHeight =  webpObject.getHeight(); // 高
+        double picScale = NumberUtil.round(picWidth * 1.0 / picHeight, 2).doubleValue(); // 宽高比
+        // 包装
+        UploadPictureResult uploadPictureResult = new UploadPictureResult();
+        uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + webpObject.getKey());
+        uploadPictureResult.setPicName(FileUtil.mainName(originFileName));
+        uploadPictureResult.setPicSize(webpObject.getSize().longValue());
+        uploadPictureResult.setPicWidth(picWidth);
+        uploadPictureResult.setPicHeight(picHeight);
+        uploadPictureResult.setPicScale(picScale);
+        uploadPictureResult.setPicFormat(format);
+        uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" +thumbObject.getKey());
+        // 返回图片的详细信息
+        return uploadPictureResult;
+    }
 
     /**
      * 封装返回结果

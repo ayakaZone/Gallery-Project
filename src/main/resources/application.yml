@@ -4,6 +4,10 @@ server:
   servlet:
     # 上下文路径 例：localhost:8123/api
     context-path: /api
+    # Cookie 30 天过期
+    session:
+      cookie:
+        max-age: 2592000
 
 # spring 配置
 spring:
@@ -15,11 +19,21 @@ spring:
     url: jdbc:mysql://localhost:3306/yu_picture # 指定数据库的地址
     username: root
     password: 1234
+  # Redis 配置
+  redis:
+    database: 1
+    host: 127.0.0.1
+    port: 6379
+    timeout: 5000
+    password: 123456
   profiles:
     active: local
   servlet:
     multipart:
       max-file-size: 10MB
+  session:
+    store-type: redis
+    timeout: 2592000
 
 # MyBatis 配置
 mybatis-plus:
