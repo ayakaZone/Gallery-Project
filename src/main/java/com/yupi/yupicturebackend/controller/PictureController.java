@@ -10,6 +10,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.yupi.yupicturebackend.annotation.AuthCheck;
+import com.yupi.yupicturebackend.api.imagesearch.ImageSearchApiFacade;
+import com.yupi.yupicturebackend.api.imagesearch.model.ImageSearchResult;
 import com.yupi.yupicturebackend.common.BaseResponse;
 import com.yupi.yupicturebackend.common.DeleteRequest;
 import com.yupi.yupicturebackend.common.ResultUtils;
@@ -395,6 +397,58 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         pictureService.editPicture(pictureEditRequest, loginUser);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 查询颜色相似图片
+     *
+     * @param searchPictureByColorRequest
+     * @return
+     */
+    @PostMapping("/search/color")
+    @ApiOperation("查询颜色相似图片")
+    public BaseResponse<List<PictureVO>> searchPictureByColor(
+            @RequestBody SearchPictureByColorRequest searchPictureByColorRequest, HttpServletRequest request) {
+        /// 校验
+        ThrowUtils.throwIf(ObjUtil.isEmpty(searchPictureByColorRequest), ErrorCode.PARAMS_ERROR, "参数错误");
+        // 获取参数
+        Long spaceId = searchPictureByColorRequest.getSpaceId();
+        String pictureColor = searchPictureByColorRequest.getPicColor();
+        User loginUser = userService.getLoginUser(request);
+        List<PictureVO> result = pictureService.searchPictureByColor(spaceId, pictureColor, loginUser);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 用户批量更新图片标签和分类
+     * @param pictureEditByBatchRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/edit/batch")
+    @ApiOperation("用户批量更新图片标签和分类")
+    public BaseResponse<Boolean> editPictureByBatch(
+            @RequestBody PictureEditByBatchRequest pictureEditByBatchRequest, HttpServletRequest request) {
+        // 校验参数
+        ThrowUtils.throwIf(ObjUtil.isEmpty(pictureEditByBatchRequest), ErrorCode.PARAMS_ERROR, "参数错误");
+        User loginUser = userService.getLoginUser(request);
+        pictureService.editPictureByBatch(pictureEditByBatchRequest,loginUser);
+        return ResultUtils.success(true);
+    }
+
+    @PostMapping("/search/picture")
+    @ApiOperation("以图识图（百度识图）")
+    public BaseResponse<List<ImageSearchResult>> searchPictureByPicture(
+            @RequestBody SearchPictureByPictureRequest searchPictureByPictureRequest, HttpServletRequest request) {
+        // 校验参数
+        ThrowUtils.throwIf(ObjUtil.isEmpty(searchPictureByPictureRequest), ErrorCode.PARAMS_ERROR, "参数错误");
+        Long pictureId = searchPictureByPictureRequest.getPictureId();
+        ThrowUtils.throwIf(ObjUtil.isEmpty(pictureId) || pictureId <= 0, ErrorCode.PARAMS_ERROR, "参数错误");
+        Picture picture = pictureService.getById(pictureId);
+        ThrowUtils.throwIf(ObjUtil.isEmpty(picture), ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+        // 调用以图识图API
+        List<ImageSearchResult> imageSearchResults = ImageSearchApiFacade.searchImage(picture.getUrl());
+        return ResultUtils.success(imageSearchResults);
     }
 }
 

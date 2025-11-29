@@ -47,7 +47,7 @@ public abstract class PictureUploadTemplate {
     private CosManager cosManager;
 
     /**
-     * 通用图片上传 Url
+     * 通用图片上传 文件/Url
      *
      * @param inputSource
      * @param uploadPathPrefix
@@ -93,7 +93,7 @@ public abstract class PictureUploadTemplate {
                 if (objectList.size() > 1) {
                     thumbnailObject = objectList.get(1);
                 }
-                return buildResult(originFileName, webpObject, thumbnailObject);
+                return buildResult(originFileName, webpObject, thumbnailObject, imageInfo);
             }
             // todo 封装返回结果
             return buildResult(imageInfo, uploadPath, originFileName, file);
@@ -109,6 +109,7 @@ public abstract class PictureUploadTemplate {
 
     /**
      * 处理文件
+     *
      * @param inputSource
      * @param file
      */
@@ -116,6 +117,7 @@ public abstract class PictureUploadTemplate {
 
     /**
      * 获得文件原始名
+     *
      * @param inputSource
      * @return
      */
@@ -124,22 +126,24 @@ public abstract class PictureUploadTemplate {
 
     /**
      * 校验输入源（url/MultipartFile）
+     *
      * @param inputSource
      */
     protected abstract void validPicture(Object inputSource);
 
     /**
      * 封装返回结果（带图片处理后）
+     *
      * @param originFileName
      * @param webpObject
      * @return
      */
-    private UploadPictureResult buildResult(String originFileName, CIObject webpObject, CIObject thumbObject) {
+    private UploadPictureResult buildResult(String originFileName, CIObject webpObject, CIObject thumbObject, ImageInfo imageInfo) {
         // 包装图片信息类
 
         String format = webpObject.getFormat(); // 格式
         int picWidth = webpObject.getWidth();   // 宽
-        int picHeight =  webpObject.getHeight(); // 高
+        int picHeight = webpObject.getHeight(); // 高
         double picScale = NumberUtil.round(picWidth * 1.0 / picHeight, 2).doubleValue(); // 宽高比
         // 包装
         UploadPictureResult uploadPictureResult = new UploadPictureResult();
@@ -150,13 +154,15 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicHeight(picHeight);
         uploadPictureResult.setPicScale(picScale);
         uploadPictureResult.setPicFormat(format);
-        uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" +thumbObject.getKey());
+        uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbObject.getKey());
+        uploadPictureResult.setPicColor(imageInfo.getAve());
         // 返回图片的详细信息
         return uploadPictureResult;
     }
 
     /**
      * 封装返回结果
+     *
      * @param imageInfo
      * @param uploadPath
      * @param originFileName
@@ -178,6 +184,7 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicHeight(picHeight);
         uploadPictureResult.setPicScale(picScale);
         uploadPictureResult.setPicFormat(format);
+        uploadPictureResult.setPicColor(imageInfo.getAve());
         // 返回图片的详细信息
         return uploadPictureResult;
     }

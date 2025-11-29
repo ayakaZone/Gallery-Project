@@ -11,6 +11,7 @@ import com.yupi.yupicturebackend.model.vo.PictureVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author Ayaki
@@ -108,4 +109,21 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser
      */
     void deletePicture(DeleteRequest deleteRequest, User loginUser);
+
+    /**
+     * 根据颜色相似度查找
+     *
+     * @param SpaceId
+     * @param pictureColor
+     * @param login
+     */
+    List<PictureVO> searchPictureByColor(Long SpaceId, String pictureColor, User login);
+
+    /**
+     * 批量修改图片
+     *
+     * @param pictureEditByBatchRequest
+     * @param loginUser
+     */
+    void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest, User loginUser);
 }
