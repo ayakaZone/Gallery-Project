@@ -2,10 +2,8 @@ package com.yupi.yupicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yupi.yupicturebackend.model.dto.picture.PictureQueryRequest;
-import com.yupi.yupicturebackend.model.dto.picture.PictureReviewRequest;
-import com.yupi.yupicturebackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.yupi.yupicturebackend.model.dto.picture.PictureUploadRequest;
+import com.yupi.yupicturebackend.common.DeleteRequest;
+import com.yupi.yupicturebackend.model.dto.picture.*;
 import com.yupi.yupicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yupi.yupicturebackend.model.entity.User;
@@ -89,4 +87,25 @@ public interface PictureService extends IService<Picture> {
      * 清理COS对象存储中的过期图片
      */
     void clearPictureFile(Picture picture);
+
+    /**
+     * 图片操作权限校验
+     * @param user
+     * @param picture
+     */
+    void checkPictureAuth(User user, Picture picture);
+
+    /**
+     * 用户图片编辑
+     * @param pictureEditRequest
+     * @param loginUser
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 用户管理员删除图片
+     * @param deleteRequest
+     * @param loginUser
+     */
+    void deletePicture(DeleteRequest deleteRequest, User loginUser);
 }

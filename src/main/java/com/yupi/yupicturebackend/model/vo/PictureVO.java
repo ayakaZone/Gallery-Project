@@ -106,6 +106,11 @@ public class PictureVO implements Serializable {
     private Date updateTime;
 
     /**
+     * 空间 id
+     */
+    private Long spaceId;
+
+    /**
      * vo 转 entity
      *
      * @param picture

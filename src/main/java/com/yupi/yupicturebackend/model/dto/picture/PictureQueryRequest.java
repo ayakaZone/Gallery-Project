@@ -5,12 +5,13 @@ import com.yupi.yupicturebackend.common.PageRequest;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 @Data
 public class PictureQueryRequest extends PageRequest implements Serializable {
 
+
+    private static final long serialVersionUID = 6208001677224623354L;
     /**
      * id
      */
@@ -86,4 +87,13 @@ public class PictureQueryRequest extends PageRequest implements Serializable {
      */
     private Long reviewerId;
 
+    /**
+     * 空间 ID
+     */
+    private Long spaceId;
+
+    /**
+     * 是否查询公共图库
+     */
+    private boolean nullSpaceId;
 }
