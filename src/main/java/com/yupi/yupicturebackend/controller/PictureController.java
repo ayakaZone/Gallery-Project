@@ -10,6 +10,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.yupi.yupicturebackend.annotation.AuthCheck;
+import com.yupi.yupicturebackend.api.aliyunai.AliYunAiApi;
+import com.yupi.yupicturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.yupi.yupicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.yupi.yupicturebackend.api.aliyunai.model.GetOutPaintingTaskResponse;
 import com.yupi.yupicturebackend.api.imagesearch.ImageSearchApiFacade;
 import com.yupi.yupicturebackend.api.imagesearch.model.ImageSearchResult;
 import com.yupi.yupicturebackend.common.BaseResponse;
@@ -73,6 +77,8 @@ public class PictureController {
                     .build();
     @Autowired
     private SpaceService spaceService;
+    @Autowired
+    private AliYunAiApi aliYunAiApi;
 
     ///  临时公共接口
 
@@ -436,6 +442,12 @@ public class PictureController {
         return ResultUtils.success(true);
     }
 
+    /**
+     * 以图识图
+     * @param searchPictureByPictureRequest
+     * @param request
+     * @return
+     */
     @PostMapping("/search/picture")
     @ApiOperation("以图识图（百度识图）")
     public BaseResponse<List<ImageSearchResult>> searchPictureByPicture(
@@ -449,6 +461,39 @@ public class PictureController {
         // 调用以图识图API
         List<ImageSearchResult> imageSearchResults = ImageSearchApiFacade.searchImage(picture.getUrl());
         return ResultUtils.success(imageSearchResults);
+    }
+
+    /**
+     * 请求AI扩图
+     * @param createPictureOutPaintingTaskRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/out_painting/create_task")
+    @ApiOperation("请求AI扩图")
+    public BaseResponse<CreateOutPaintingTaskResponse> createPictureOutPaintingTask(
+            @RequestBody CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, HttpServletRequest request) {
+        // 校验参数
+        ThrowUtils.throwIf(ObjUtil.isEmpty(createPictureOutPaintingTaskRequest), ErrorCode.PARAMS_ERROR, "参数错误");
+        User loginUser = userService.getLoginUser(request);
+        // 调用创建扩图任务的服务
+        CreateOutPaintingTaskResponse response = pictureService.createPictureOutPaintingTask
+                (createPictureOutPaintingTaskRequest, loginUser);
+        return ResultUtils.success(response);
+    }
+
+    /**
+     * 获取AI扩图任务
+     * @param taskId
+     * @return
+     */
+    @GetMapping("/out_painting/get_task")
+    @ApiOperation("请求AI扩图")
+    public BaseResponse<GetOutPaintingTaskResponse> getPictureOutPaintingTask(String taskId) {
+        // 校验参数
+        ThrowUtils.throwIf(ObjUtil.isEmpty(taskId), ErrorCode.PARAMS_ERROR, "参数错误");
+        GetOutPaintingTaskResponse task = aliYunAiApi.getOutPaintingTask(taskId);
+        return ResultUtils.success(task);
     }
 }
 
