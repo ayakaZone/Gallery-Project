@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.yupi.yupicturebackend.exception.BusinessException;
 import com.yupi.yupicturebackend.model.entity.Space;
+import com.yupi.yupicturebackend.model.entity.SpaceUser;
 import com.yupi.yupicturebackend.model.vo.UserVO;
+import io.github.classgraph.json.Id;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,63 +20,32 @@ import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
  * 用户视图（脱敏）
  */
 @Data
-public class SpaceVO implements Serializable {
+public class SpaceUserVO implements Serializable {
 
     /**
      * id
      */
-    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
-     * 空间名称
+     * 空间 ID
      */
-    private String spaceName;
+    private Long spaceId;
 
     /**
-     * 空间类型：0-个人空间 1-团队空间
-     */
-    private Integer spaceType;
-
-    /**
-     * 空间级别：0-普通版 1-专业版 2-旗舰版
-     */
-    private Integer spaceLevel;
-
-    /**
-     * 空间图片的最大总大小
-     */
-    private Long maxSize;
-
-    /**
-     * 空间图片的最大数量
-     */
-    private Long maxCount;
-
-    /**
-     * 当前空间下图片的总大小
-     */
-    private Long totalSize;
-
-    /**
-     * 当前空间下的图片数量
-     */
-    private Long totalCount;
-
-    /**
-     * 创建用户 id
+     * 用户 ID
      */
     private Long userId;
+
+    /**
+     * 空间角色：viewer/editor/admin
+     */
+    private String spaceRole;
 
     /**
      * 创建时间
      */
     private Date createTime;
-
-    /**
-     * 编辑时间
-     */
-    private Date editTime;
 
     /**
      * 更新时间
@@ -86,35 +57,40 @@ public class SpaceVO implements Serializable {
      */
     private UserVO userVO;
 
+    /**
+     * 空间信息
+     */
+    private SpaceVO space;
+
     private static final long serialVersionUID = 1L;
 
     /**
      * vo 转 entity
      *
-     * @param space
+     * @param spaceUser
      * @return
      */
-    public static SpaceVO objToVo(Space space) {
+    public static SpaceUserVO objToVo(SpaceUser spaceUser) {
         // 校验
-        if (ObjUtil.isEmpty(space)) {
+        if (ObjUtil.isEmpty(spaceUser)) {
             throw new BusinessException(PARAMS_ERROR, "空间不存在");
         }
         // 拷贝属性
-        return BeanUtil.copyProperties(space, SpaceVO.class);
+        return BeanUtil.copyProperties(spaceUser, SpaceUserVO.class);
     }
 
     /**
      * entity 转 vo
      *
-     * @param spaceVO
+     * @param spaceUserVO
      * @return
      */
-    public static Space voToObj(SpaceVO spaceVO) {
+    public static SpaceUser voToObj(SpaceUserVO spaceUserVO) {
         // 校验
-        if (ObjUtil.isEmpty(spaceVO)) {
+        if (ObjUtil.isEmpty(spaceUserVO)) {
             throw new BusinessException(PARAMS_ERROR, "空间不存在");
         }
         // 拷贝属性
-        return BeanUtil.copyProperties(spaceVO, Space.class);
+        return BeanUtil.copyProperties(spaceUserVO, SpaceUser.class);
     }
 }

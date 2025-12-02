@@ -1,0 +1,186 @@
+package com.yupi.yupicturebackend.controller;
+
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yupi.yupicturebackend.annotation.AuthCheck;
+import com.yupi.yupicturebackend.common.BaseResponse;
+import com.yupi.yupicturebackend.common.DeleteRequest;
+import com.yupi.yupicturebackend.common.ResultUtils;
+import com.yupi.yupicturebackend.constant.UserConstant;
+import com.yupi.yupicturebackend.exception.ErrorCode;
+import com.yupi.yupicturebackend.exception.ThrowUtils;
+import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
+import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
+import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
+import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
+import com.yupi.yupicturebackend.model.entity.Space;
+import com.yupi.yupicturebackend.model.entity.SpaceUser;
+import com.yupi.yupicturebackend.model.entity.User;
+import com.yupi.yupicturebackend.model.enums.SpaceLevelEnum;
+import com.yupi.yupicturebackend.model.vo.space.SpaceUserVO;
+import com.yupi.yupicturebackend.service.SpaceService;
+import com.yupi.yupicturebackend.service.SpaceUserService;
+import com.yupi.yupicturebackend.service.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.net.http.HttpRequest;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/spaceUser")
+@Api(tags = "团队空间接口")
+public class SpaceUserController {
+
+    @Resource
+    private SpaceUserService spaceUserService;
+    @Autowired
+    private UserService userService;
+
+    /**
+     * 创建团队空间
+     *
+     * @param spaceUserAddRequest
+     * @return
+     */
+    @PostMapping("/add")
+    @ApiOperation("创建团队空间/加入团队空间")
+    public BaseResponse<Long> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
+        /// 校验
+        ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUserAddRequest), ErrorCode.PARAMS_ERROR);
+        Long spaceUserId = spaceUserService.addSpaceUser(spaceUserAddRequest);
+        return ResultUtils.success(spaceUserId);
+    }
+
+    /**
+     * 删除团队空间
+     *
+     * @param deleteRequest
+     * @return
+     */
+    @PostMapping("/delete")
+    @ApiOperation("删除团队空间成员")
+    public BaseResponse<Boolean> deleteSpaceUser(@RequestBody DeleteRequest deleteRequest) {
+        /// 校验
+        ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
+        spaceUserService.deleteSpaceUser(deleteRequest);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 团队空间编辑
+     *
+     * @param spaceUserEditRequest
+     * @return
+     */
+    @PostMapping("/edit")
+    @ApiOperation("团队空间编辑成员")
+    public BaseResponse<Boolean> editSpaceUser(
+            @RequestBody SpaceUserEditRequest spaceUserEditRequest) {
+        /// 校验
+        ThrowUtils.throwIf(
+                ObjUtil.isEmpty(spaceUserEditRequest) || spaceUserEditRequest.getId() <= 0,
+                ErrorCode.PARAMS_ERROR);
+        spaceUserService.editSpaceUser(spaceUserEditRequest);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 获取成员空间信息
+     *
+     * @param spaceUserQueryRequest
+     * @return
+     */
+    @PostMapping("/get")
+    @ApiOperation("获取成员空间信息")
+    public BaseResponse<SpaceUser> getSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
+        /// 校验
+        ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUserQueryRequest), ErrorCode.PARAMS_ERROR);
+        // 获取参数
+        Long spaceId = spaceUserQueryRequest.getSpaceId();
+        Long userId = spaceUserQueryRequest.getUserId();
+        ThrowUtils.throwIf(ObjUtil.hasEmpty(spaceId, userId), ErrorCode.PARAMS_ERROR);
+        // 查询条件
+        QueryWrapper<SpaceUser> queryWrapper = spaceUserService.getQueryWrapper(spaceUserQueryRequest);
+        SpaceUser spaceUser = spaceUserService.getOne(queryWrapper);
+        ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUser), ErrorCode.NOT_FOUND_ERROR);
+
+        return ResultUtils.success(spaceUser);
+    }
+
+    /**
+     * 查询团队空间成员列表
+     *
+     * @param spaceUserQueryRequest
+     * @return
+     */
+    @PostMapping("/list")
+    @ApiOperation("查询团队空间成员列表")
+    public BaseResponse<List<SpaceUserVO>> listSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
+        /// 校验
+        ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUserQueryRequest), ErrorCode.PARAMS_ERROR);
+        // 查询条件
+        QueryWrapper<SpaceUser> queryWrapper = spaceUserService.getQueryWrapper(spaceUserQueryRequest);
+        // 查询数据库
+        List<SpaceUser> list = spaceUserService.list(queryWrapper);
+        // 转换为VO列表
+        List<SpaceUserVO> spaceUserVOList = spaceUserService.getSpaceUserVOList(list);
+        return ResultUtils.success(spaceUserVOList);
+    }
+
+    /**
+     * 查询我加入的团队列表
+     * @param request
+     * @return
+     */
+    @PostMapping("/list/my")
+    @ApiOperation("查询我加入的团队列表")
+    public BaseResponse<List<SpaceUserVO>> listMySpaceUser(HttpServletRequest request) {
+        // 校验登录用户
+        User loginUser = userService.getLoginUser(request);
+        ThrowUtils.throwIf(ObjUtil.isEmpty(loginUser), ErrorCode.NOT_LOGIN_ERROR);
+        // 创建查询条件
+        SpaceUserQueryRequest spaceUserQueryRequest = new SpaceUserQueryRequest();
+        spaceUserQueryRequest.setUserId(loginUser.getId());
+        QueryWrapper<SpaceUser> queryWrapper = spaceUserService.getQueryWrapper(spaceUserQueryRequest);
+        // 查询数据库
+        List<SpaceUser> list = spaceUserService.list(queryWrapper);
+        // 封装VO列表
+        List<SpaceUserVO> spaceUserVOList = spaceUserService.getSpaceUserVOList(list);
+        return ResultUtils.success(spaceUserVOList);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
