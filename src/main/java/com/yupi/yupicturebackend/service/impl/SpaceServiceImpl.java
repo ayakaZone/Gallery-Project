@@ -16,7 +16,7 @@ import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
 import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.User;
 import com.yupi.yupicturebackend.model.enums.SpaceLevelEnum;
-import com.yupi.yupicturebackend.model.vo.SpaceVO;
+import com.yupi.yupicturebackend.model.vo.space.SpaceVO;
 import com.yupi.yupicturebackend.model.vo.UserVO;
 import com.yupi.yupicturebackend.service.SpaceService;
 import com.yupi.yupicturebackend.service.UserService;
@@ -240,6 +240,19 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
             });
             // 校验为空就返回默认值 1L
             return Optional.ofNullable(newSpaceId).orElse(1L);
+        }
+    }
+
+    /**
+     * 校验空间权限
+     *
+     * @param loginUser
+     * @param space
+     */
+    @Override
+    public void checkSpaceAuth(User loginUser, Space space) {
+        if (!loginUser.getId().equals(space.getUserId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权编辑空间");
         }
     }
 }

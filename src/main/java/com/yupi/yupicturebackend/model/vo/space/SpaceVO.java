@@ -1,14 +1,12 @@
-package com.yupi.yupicturebackend.model.vo;
+package com.yupi.yupicturebackend.model.vo.space;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.model.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
+import com.yupi.yupicturebackend.model.vo.UserVO;
 import lombok.Data;
 
 import java.io.Serializable;

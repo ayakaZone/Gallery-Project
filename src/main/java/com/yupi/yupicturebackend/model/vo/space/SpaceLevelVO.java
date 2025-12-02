@@ -1,12 +1,9 @@
-package com.yupi.yupicturebackend.model.vo;
+package com.yupi.yupicturebackend.model.vo.space;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 脱敏用户

@@ -8,7 +8,7 @@ import com.yupi.yupicturebackend.model.dto.space.SpaceAddRequest;
 import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
 import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.User;
-import com.yupi.yupicturebackend.model.vo.SpaceVO;
+import com.yupi.yupicturebackend.model.vo.space.SpaceVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -65,4 +65,12 @@ public interface SpaceService extends IService<Space> {
      * @param loginUser
      */
     Long addSpace(SpaceAddRequest spaceAddRequest, User loginUser);
+
+    /**
+     * 校验空间权限
+     *
+     * @param loginUser
+     * @param space
+     */
+    void checkSpaceAuth(User loginUser, Space space);
 }

@@ -75,6 +75,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     private TransactionTemplate transactionTemplate;
     @Autowired
     private AliYunAiApi aliYunAiApi;
+
     /**
      * 文件上传
      *
@@ -650,7 +651,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 批量编辑图片
         pictureList.forEach(picture -> {
             // 分类
-            if (StrUtil.isNotBlank( category)) {
+            if (StrUtil.isNotBlank(category)) {
                 picture.setCategory(category);
             }
             // 标签
@@ -665,6 +666,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 
     /**
      * 用户命名规则处理
+     *
      * @param pictureList
      * @param nameRule
      */
@@ -712,4 +714,6 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 调用Api发起请求
         return aliYunAiApi.createOutPaintingTask(createOutPaintingTaskRequest);
     }
+
+
 }
