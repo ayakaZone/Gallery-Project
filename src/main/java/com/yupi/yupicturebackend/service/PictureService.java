@@ -92,11 +92,11 @@ public interface PictureService extends IService<Picture> {
     void clearPictureFile(Picture picture);
 
     /**
-     * 图片操作权限校验
+     * 图片操作权限校验——已使用Sa-Token完成权限校验
      * @param user
      * @param picture
      */
-    void checkPictureAuth(User user, Picture picture);
+/*    void checkPictureAuth(User user, Picture picture);*/
 
     /**
      * 用户图片编辑

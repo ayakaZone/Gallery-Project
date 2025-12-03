@@ -35,7 +35,7 @@ spring:
     store-type: redis
     timeout: 2592000
 
-# MyBatis 配置
+# MyBatisPlus 配置
 mybatis-plus:
   configuration:
     # 驼峰命名

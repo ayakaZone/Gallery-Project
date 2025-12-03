@@ -75,6 +75,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     private TransactionTemplate transactionTemplate;
     @Autowired
     private AliYunAiApi aliYunAiApi;
+    private PictureService pictureService;
 
     /**
      * 文件上传
@@ -289,7 +290,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             return pictureVOPage;
         }
         // 封装 VO
-        List<PictureVO> pictureVOList = records.stream().map(PictureVO::objToVo).collect(Collectors.toList());
+        List<PictureVO> pictureVOList = records.stream()
+                .map(picture -> {return getPictureVO(picture, request);})
+                .collect(Collectors.toList());
         ///  一个用户可以有多张图片，使用 Map<UserId,List<PictureVO>
         // 获取 userId 集合
         Set<Long> userIdSet = records.stream().map(Picture::getUserId).collect(Collectors.toSet());
@@ -479,27 +482,27 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     }
 
     /**
-     * 图片校验权限操作
+     * 图片校验权限操作——已使用Sa—Token完成权限校验
      *
      * @param user
      * @param picture
      */
-    @Override
-    public void checkPictureAuth(User user, Picture picture) {
-        Long spaceId = picture.getSpaceId();
-        // 公共图库
-        if (ObjUtil.isEmpty(spaceId)) {
-            // 仅本人和管理员可以对图片操作
-            if (!picture.getUserId().equals(user.getId()) && !userService.isAdmin(user)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权操作此图片");
-            }
-        } else { // 私有空间
-            // 仅本人对图片操作
-            if (!picture.getUserId().equals(user.getId())) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权操作此图片");
-            }
-        }
-    }
+//    @Override
+//    public void checkPictureAuth(User user, Picture picture) {
+//        Long spaceId = picture.getSpaceId();
+//        // 公共图库
+//        if (ObjUtil.isEmpty(spaceId)) {
+//            // 仅本人和管理员可以对图片操作
+//            if (!picture.getUserId().equals(user.getId()) && !userService.isAdmin(user)) {
+//                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权操作此图片");
+//            }
+//        } else { // 私有空间
+//            // 仅本人对图片操作
+//            if (!picture.getUserId().equals(user.getId())) {
+//                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权操作此图片");
+//            }
+//        }
+//    }
 
     /**
      * 用户编辑图片
@@ -523,8 +526,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture oldPicture = this.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(oldPicture), ErrorCode.NOT_FOUND_ERROR);
         /// 仅用户本人和管理员可编辑
-        // 权限校验
-        this.checkPictureAuth(loginUser, oldPicture);
+        // 权限校验——已使用Sa-Token鉴权
+        // this.checkPictureAuth(loginUser, oldPicture);
         // 补充审核信息
         this.fillReviewParams(picture, loginUser);
         // 更新图片
@@ -543,8 +546,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 图片是否存在
         Picture oldPicture = this.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(oldPicture), ErrorCode.NOT_FOUND_ERROR);
-        // 权限校验
-        this.checkPictureAuth(loginUser, oldPicture);
+        // 权限校验——已使用Sa-Token鉴权
+        // this.checkPictureAuth(loginUser, oldPicture);
         // 逻辑删除
         transactionTemplate.execute(status -> {
             // 删除数据
@@ -701,9 +704,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture picture = getById(pictureId);
         Optional.ofNullable(picture)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图片不存在"));
-        // 校验权限
-        ThrowUtils.throwIf(!picture.getUserId().equals(loginUser.getId()),
-                ErrorCode.NO_AUTH_ERROR, "无权操作此图片");
+        // 校验权限 已使用 Sa-Token鉴权
+        // ThrowUtils.throwIf(!picture.getUserId().equals(loginUser.getId()),
+        //         ErrorCode.NO_AUTH_ERROR, "无权操作此图片");
         // 封装请求参数的 url字段
         CreateOutPaintingTaskRequest createOutPaintingTaskRequest = new CreateOutPaintingTaskRequest();
         CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();

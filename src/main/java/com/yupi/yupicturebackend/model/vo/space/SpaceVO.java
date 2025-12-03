@@ -10,7 +10,9 @@ import com.yupi.yupicturebackend.model.vo.UserVO;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
 
@@ -85,6 +87,11 @@ public class SpaceVO implements Serializable {
      * 用户信息
      */
     private UserVO userVO;
+
+    /**
+     * 权限列表
+     */
+    private List<String> permissionList = new ArrayList<>();
 
     private static final long serialVersionUID = 1L;
 

@@ -7,6 +7,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yupi.yupicturebackend.auth.StpKit;
 import com.yupi.yupicturebackend.exception.BusinessException;
 import com.yupi.yupicturebackend.exception.ErrorCode;
 import com.yupi.yupicturebackend.exception.ThrowUtils;
@@ -122,6 +123,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // Session 的用户登陆状态
         request.getSession().setAttribute(USER_LOGIN_STATE, user);
+        // 使用 Sa-Token 记录登录态
+        StpKit.SPACE.login(user.getId());
+        // 记录用户信息
+        StpKit.SPACE.getSession().set(USER_LOGIN_STATE, user);
         // 用户脱敏
         return this.getLoginUserVO(user);
     }

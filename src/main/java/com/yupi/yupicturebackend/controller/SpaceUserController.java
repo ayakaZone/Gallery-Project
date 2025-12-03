@@ -1,27 +1,21 @@
 package com.yupi.yupicturebackend.controller;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yupi.yupicturebackend.annotation.AuthCheck;
+import com.yupi.yupicturebackend.auth.annotation.SaSpaceCheckPermission;
+import com.yupi.yupicturebackend.auth.model.SpaceUserPermissionConstant;
 import com.yupi.yupicturebackend.common.BaseResponse;
 import com.yupi.yupicturebackend.common.DeleteRequest;
 import com.yupi.yupicturebackend.common.ResultUtils;
-import com.yupi.yupicturebackend.constant.UserConstant;
 import com.yupi.yupicturebackend.exception.ErrorCode;
 import com.yupi.yupicturebackend.exception.ThrowUtils;
-import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
-import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.SpaceUser;
 import com.yupi.yupicturebackend.model.entity.User;
-import com.yupi.yupicturebackend.model.enums.SpaceLevelEnum;
 import com.yupi.yupicturebackend.model.vo.space.SpaceUserVO;
-import com.yupi.yupicturebackend.service.SpaceService;
 import com.yupi.yupicturebackend.service.SpaceUserService;
 import com.yupi.yupicturebackend.service.UserService;
 import io.swagger.annotations.Api;
@@ -31,11 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.net.http.HttpRequest;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/spaceUser")
@@ -55,6 +45,7 @@ public class SpaceUserController {
      */
     @PostMapping("/add")
     @ApiOperation("创建团队空间/加入团队空间")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Long> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUserAddRequest), ErrorCode.PARAMS_ERROR);
@@ -70,6 +61,7 @@ public class SpaceUserController {
      */
     @PostMapping("/delete")
     @ApiOperation("删除团队空间成员")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Boolean> deleteSpaceUser(@RequestBody DeleteRequest deleteRequest) {
         /// 校验
         ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
@@ -85,6 +77,7 @@ public class SpaceUserController {
      */
     @PostMapping("/edit")
     @ApiOperation("团队空间编辑成员")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Boolean> editSpaceUser(
             @RequestBody SpaceUserEditRequest spaceUserEditRequest) {
         /// 校验
@@ -103,6 +96,7 @@ public class SpaceUserController {
      */
     @PostMapping("/get")
     @ApiOperation("获取成员空间信息")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<SpaceUser> getSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUserQueryRequest), ErrorCode.PARAMS_ERROR);
@@ -126,6 +120,7 @@ public class SpaceUserController {
      */
     @PostMapping("/list")
     @ApiOperation("查询团队空间成员列表")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<List<SpaceUserVO>> listSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUserQueryRequest), ErrorCode.PARAMS_ERROR);

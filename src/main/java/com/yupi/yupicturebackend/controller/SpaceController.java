@@ -5,6 +5,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.yupicturebackend.annotation.AuthCheck;
+import com.yupi.yupicturebackend.auth.SpaceUserAuthManager;
 import com.yupi.yupicturebackend.common.BaseResponse;
 import com.yupi.yupicturebackend.common.DeleteRequest;
 import com.yupi.yupicturebackend.common.ResultUtils;
@@ -25,6 +26,7 @@ import com.yupi.yupicturebackend.service.SpaceService;
 import com.yupi.yupicturebackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -44,6 +46,8 @@ public class SpaceController {
 
     @Resource
     private SpaceService spaceService;
+    @Autowired
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     /**
      * 创建空间
@@ -179,10 +183,15 @@ public class SpaceController {
         // 获取空间
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(space), ErrorCode.NOT_FOUND_ERROR);
-        // 转VO
-        SpaceVO spaceVO = SpaceVO.objToVo(space);
+        // 获得spaceVO
+        SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
+        User loginUser = userService.getLoginUser(request);
+        // 获得权限列表
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+        // 存入权限列表
+        spaceVO.setPermissionList(permissionList);
         // 存入UserVO
-        spaceVO.setUserVO(userService.getUserVO(userService.getLoginUser(request)));
+        spaceVO.setUserVO(userService.getUserVO(loginUser));
         return ResultUtils.success(spaceVO);
     }
 
