@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yupi.yupicturebackend.exception.BusinessException;
 import com.yupi.yupicturebackend.exception.ErrorCode;
 import com.yupi.yupicturebackend.exception.ThrowUtils;
+import com.yupi.yupicturebackend.manager.sharding.DynamicShardingManager;
 import com.yupi.yupicturebackend.mapper.SpaceMapper;
 import com.yupi.yupicturebackend.model.dto.space.SpaceAddRequest;
 import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
@@ -47,6 +48,11 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
     private TransactionTemplate transactionTemplate;
     @Resource
     private SpaceUserService spaceUserService;
+
+    // 为了方便部署、不使用分表
+//    @Resource
+//    @Lazy
+//    private DynamicShardingManager dynamicShardingManager;
 
     /**
      * 空间查询条件
@@ -272,6 +278,8 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
                     boolean save = spaceUserService.save(spaceUser);
                     ThrowUtils.throwIf(!save, ErrorCode.OPERATION_ERROR, "添加团队空间成员失败");
                 }
+                // 如果是旗舰版团队空间，则为其单独创建分表——为了方便部署，暂不使用分表
+                // dynamicShardingManager.createSpacePictureTable(space);
                 return space.getId();
             });
             // 校验为空就返回默认值 1L
