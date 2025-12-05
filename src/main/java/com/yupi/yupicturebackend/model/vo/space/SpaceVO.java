@@ -4,9 +4,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.yupi.yupicturebackend.exception.BusinessException;
+import yupicture.infrastructure.exception.BusinessException;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.vo.UserVO;
+import yupicture.interfaces.vo.user.UserVO;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
+import static yupicture.infrastructure.exception.ErrorCode.PARAMS_ERROR;
 
 /**
  * 用户视图（脱敏）

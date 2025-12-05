@@ -4,16 +4,17 @@ package com.yupi.yupicturebackend.model.vo;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
-import com.yupi.yupicturebackend.exception.BusinessException;
+import yupicture.infrastructure.exception.BusinessException;
 import com.yupi.yupicturebackend.model.entity.Picture;
 import lombok.Data;
+import yupicture.interfaces.vo.user.UserVO;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
+import static yupicture.infrastructure.exception.ErrorCode.PARAMS_ERROR;
 
 @Data
 public class PictureVO implements Serializable {

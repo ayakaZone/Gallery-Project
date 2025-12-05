@@ -4,19 +4,19 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
-import com.yupi.yupicturebackend.mapper.SpaceMapper;
+import yupicture.application.service.UserApplicationService;
+import yupicture.infrastructure.exception.BusinessException;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
+import yupicture.infrastructure.mapper.SpaceMapper;
 import com.yupi.yupicturebackend.model.dto.analyze.*;
 import com.yupi.yupicturebackend.model.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.analyze.*;
 import com.yupi.yupicturebackend.service.PictureService;
 import com.yupi.yupicturebackend.service.SpaceAnalyzeService;
 import com.yupi.yupicturebackend.service.SpaceService;
-import com.yupi.yupicturebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> implements SpaceAnalyzeService {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
     @Resource
     private SpaceService spaceService;
     @Autowired
@@ -60,7 +60,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
         QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
         if (queryAll || queryPublic) {
             // 权限校验:仅管理员权限
-            ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR);
+            ThrowUtils.throwIf(!loginUser.isAdmin(), ErrorCode.NO_AUTH_ERROR);
             // 查询公共图库需要增加条件
             if (spaceUsageAnalyzeRequest.isQueryPublic()) {
                 queryWrapper.isNull("spaceId");
@@ -256,7 +256,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
         Integer topN = spaceRankAnalyzeRequest.getTopN();
         ThrowUtils.throwIf(ObjUtil.isEmpty(topN), ErrorCode.PARAMS_ERROR, "排行榜数量不能为空");
         // 仅管理员可查询
-        ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR);
+        ThrowUtils.throwIf(!loginUser.isAdmin(), ErrorCode.NO_AUTH_ERROR);
         // 构造查询条件
         QueryWrapper<Space> queryWrapper = new QueryWrapper<>();
         // 设置查询字段、排序方式、查询个数
@@ -283,7 +283,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
         // 判断查询范围
         if (queryPublic || queryAll) {
             // 非用户查询范围，校验管理员权限
-            ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR);
+            ThrowUtils.throwIf(!loginUser.isAdmin(), ErrorCode.NO_AUTH_ERROR);
         } else {
             // 用户查询范围，校验空间是否存在
             Long spaceId = spaceAnalyzeRequest.getSpaceId();

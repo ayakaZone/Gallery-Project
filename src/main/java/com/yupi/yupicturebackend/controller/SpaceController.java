@@ -4,26 +4,26 @@ package com.yupi.yupicturebackend.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yupi.yupicturebackend.annotation.AuthCheck;
-import com.yupi.yupicturebackend.auth.SpaceUserAuthManager;
-import com.yupi.yupicturebackend.common.BaseResponse;
-import com.yupi.yupicturebackend.common.DeleteRequest;
-import com.yupi.yupicturebackend.common.ResultUtils;
-import com.yupi.yupicturebackend.constant.UserConstant;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
+import yupicture.application.service.UserApplicationService;
+import yupicture.infrastructure.annotation.AuthCheck;
+import com.yupi.yupicturebackend.manager.auth.SpaceUserAuthManager;
+import yupicture.infrastructure.common.BaseResponse;
+import yupicture.infrastructure.common.DeleteRequest;
+import yupicture.infrastructure.common.ResultUtils;
+import yupicture.domain.user.constant.UserConstant;
+import yupicture.infrastructure.exception.BusinessException;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.space.SpaceAddRequest;
 import com.yupi.yupicturebackend.model.dto.space.SpaceEditRequest;
 import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
 import com.yupi.yupicturebackend.model.dto.space.SpaceUpdateRequest;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.enums.SpaceLevelEnum;
 import com.yupi.yupicturebackend.model.vo.space.SpaceLevelVO;
 import com.yupi.yupicturebackend.model.vo.space.SpaceVO;
 import com.yupi.yupicturebackend.service.SpaceService;
-import com.yupi.yupicturebackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 public class SpaceController {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private SpaceService spaceService;
@@ -60,7 +60,7 @@ public class SpaceController {
     public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request) {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty(spaceAddRequest), ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         Long spaceId = spaceService.addSpace(spaceAddRequest, loginUser);
         return ResultUtils.success(spaceId);
     }
@@ -72,7 +72,7 @@ public class SpaceController {
         ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
         // 解析参数
         Long id = deleteRequest.getId();
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 空间是否存在
         Space oldSpace = spaceService.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(oldSpace), ErrorCode.NOT_FOUND_ERROR);
@@ -139,7 +139,7 @@ public class SpaceController {
         Space oldSpace = spaceService.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(oldSpace), ErrorCode.NOT_FOUND_ERROR, "编辑的空间不存在");
         // 仅本人或管理员可编辑
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         spaceService.checkSpaceAuth(loginUser, space);
         /// 编辑
         // 编辑-操作数据库
@@ -185,13 +185,13 @@ public class SpaceController {
         ThrowUtils.throwIf(ObjUtil.isEmpty(space), ErrorCode.NOT_FOUND_ERROR);
         // 获得spaceVO
         SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 获得权限列表
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         // 存入权限列表
         spaceVO.setPermissionList(permissionList);
         // 存入UserVO
-        spaceVO.setUserVO(userService.getUserVO(loginUser));
+        spaceVO.setUserVO(userApplicationService.getUserVO(loginUser));
         return ResultUtils.success(spaceVO);
     }
 

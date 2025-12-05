@@ -1,16 +1,16 @@
 package com.yupi.yupicturebackend.controller;
 
 import cn.hutool.core.util.ObjUtil;
-import com.yupi.yupicturebackend.common.BaseResponse;
-import com.yupi.yupicturebackend.common.ResultUtils;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
+import yupicture.application.service.UserApplicationService;
+import yupicture.infrastructure.common.BaseResponse;
+import yupicture.infrastructure.common.ResultUtils;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.analyze.*;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.analyze.*;
 import com.yupi.yupicturebackend.service.SpaceAnalyzeService;
-import com.yupi.yupicturebackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
@@ -27,7 +27,7 @@ import java.util.List;
 public class SpaceAnalyzeController {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
     @Resource
     private SpaceAnalyzeService spaceAnalyzeService;
 
@@ -45,7 +45,7 @@ public class SpaceAnalyzeController {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty
                 (spaceUsageAnalyzeRequest), ErrorCode.PARAMS_ERROR, "参数不能为空");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         SpaceUsageAnalyzeResponse spaceUsageAnalyze = spaceAnalyzeService
                 .getSpaceUsageAnalyze(spaceUsageAnalyzeRequest, loginUser);
         return ResultUtils.success(spaceUsageAnalyze);
@@ -65,7 +65,7 @@ public class SpaceAnalyzeController {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty
                 (spaceCategoryAnalyzeRequest), ErrorCode.PARAMS_ERROR, "参数不能为空");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<SpaceCategoryAnalyzeResponse> spaceCategoryAnalyze = spaceAnalyzeService.
                 getSpaceCategoryAnalyze(spaceCategoryAnalyzeRequest, loginUser);
         return ResultUtils.success(spaceCategoryAnalyze);
@@ -85,7 +85,7 @@ public class SpaceAnalyzeController {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty
                 (spaceTagAnalyzeRequest), ErrorCode.PARAMS_ERROR, "参数不能为空");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<SpaceTagAnalyzeResponse> spaceTagAnalyze = spaceAnalyzeService.
                 getSpaceTagAnalyze(spaceTagAnalyzeRequest, loginUser);
         return ResultUtils.success(spaceTagAnalyze);
@@ -105,7 +105,7 @@ public class SpaceAnalyzeController {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty
                 (spaceSizeAnalyzeRequest), ErrorCode.PARAMS_ERROR, "参数不能为空");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<SpaceSizeAnalyzeResponse> spaceSizeAnalyze = spaceAnalyzeService.
                 getSpaceSizeAnalyze(spaceSizeAnalyzeRequest, loginUser);
         return ResultUtils.success(spaceSizeAnalyze);
@@ -125,7 +125,7 @@ public class SpaceAnalyzeController {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty
                 (spaceUserAnalyzeRequest), ErrorCode.PARAMS_ERROR, "参数不能为空");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<SpaceUserAnalyzeResponse> spaceUserAnalyze = spaceAnalyzeService.
                 getSpaceUserAnalyze(spaceUserAnalyzeRequest, loginUser);
         return ResultUtils.success(spaceUserAnalyze);
@@ -146,7 +146,7 @@ public class SpaceAnalyzeController {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty
                 (spaceRankAnalyzeRequest), ErrorCode.PARAMS_ERROR, "参数不能为空");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<Space> spaceRankAnalyze = spaceAnalyzeService.
                 getSpaceRankAnalyze(spaceRankAnalyzeRequest, loginUser);
         return ResultUtils.success(spaceRankAnalyze);

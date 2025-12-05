@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.yupi.yupicturebackend.model.dto.space.SpaceAddRequest;
 import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.SpaceVO;
 
 import javax.servlet.http.HttpServletRequest;

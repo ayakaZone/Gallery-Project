@@ -5,8 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import com.yupi.yupicturebackend.model.dto.analyze.*;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.entity.User;
-import com.yupi.yupicturebackend.model.vo.space.SpaceVO;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.analyze.*;
 
 import java.util.List;

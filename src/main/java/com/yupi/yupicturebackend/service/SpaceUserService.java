@@ -1,22 +1,14 @@
 package com.yupi.yupicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yupi.yupicturebackend.common.DeleteRequest;
-import com.yupi.yupicturebackend.model.dto.space.SpaceAddRequest;
-import com.yupi.yupicturebackend.model.dto.space.SpaceEditRequest;
-import com.yupi.yupicturebackend.model.dto.space.SpaceQueryRequest;
+import yupicture.infrastructure.common.DeleteRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
-import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.SpaceUser;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.yupi.yupicturebackend.model.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.SpaceUserVO;
-import com.yupi.yupicturebackend.model.vo.space.SpaceVO;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**

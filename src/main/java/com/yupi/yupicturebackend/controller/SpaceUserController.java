@@ -3,21 +3,21 @@ package com.yupi.yupicturebackend.controller;
 
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.yupi.yupicturebackend.auth.annotation.SaSpaceCheckPermission;
-import com.yupi.yupicturebackend.auth.model.SpaceUserPermissionConstant;
-import com.yupi.yupicturebackend.common.BaseResponse;
-import com.yupi.yupicturebackend.common.DeleteRequest;
-import com.yupi.yupicturebackend.common.ResultUtils;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
+import com.yupi.yupicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
+import com.yupi.yupicturebackend.manager.auth.model.SpaceUserPermissionConstant;
+import yupicture.application.service.UserApplicationService;
+import yupicture.infrastructure.common.BaseResponse;
+import yupicture.infrastructure.common.DeleteRequest;
+import yupicture.infrastructure.common.ResultUtils;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.yupi.yupicturebackend.model.entity.SpaceUser;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.SpaceUserVO;
 import com.yupi.yupicturebackend.service.SpaceUserService;
-import com.yupi.yupicturebackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class SpaceUserController {
     @Resource
     private SpaceUserService spaceUserService;
     @Autowired
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     /**
      * 创建团队空间
@@ -142,7 +142,7 @@ public class SpaceUserController {
     @ApiOperation("查询我加入的团队列表")
     public BaseResponse<List<SpaceUserVO>> listMySpaceUser(HttpServletRequest request) {
         // 校验登录用户
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         ThrowUtils.throwIf(ObjUtil.isEmpty(loginUser), ErrorCode.NOT_LOGIN_ERROR);
         // 创建查询条件
         SpaceUserQueryRequest spaceUserQueryRequest = new SpaceUserQueryRequest();

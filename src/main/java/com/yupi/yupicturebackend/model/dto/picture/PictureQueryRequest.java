@@ -1,13 +1,15 @@
 package com.yupi.yupicturebackend.model.dto.picture;
 
 
-import com.yupi.yupicturebackend.common.PageRequest;
+import lombok.EqualsAndHashCode;
+import yupicture.infrastructure.common.PageRequest;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class PictureQueryRequest extends PageRequest implements Serializable {
 

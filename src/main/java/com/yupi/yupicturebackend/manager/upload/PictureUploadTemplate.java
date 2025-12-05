@@ -4,37 +4,22 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.http.Method;
-import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
 import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
-import com.yupi.yupicturebackend.config.CosClientConfig;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
-import com.yupi.yupicturebackend.manager.CosManager;
+import yupicture.infrastructure.config.CosClientConfig;
+import yupicture.infrastructure.exception.BusinessException;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.api.CosManager;
 import com.yupi.yupicturebackend.model.dto.file.UploadPictureResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
 
 
 @Slf4j

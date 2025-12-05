@@ -5,23 +5,23 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.yupicturebackend.common.DeleteRequest;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
+import yupicture.application.service.UserApplicationService;
+import yupicture.infrastructure.common.DeleteRequest;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
 import com.yupi.yupicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.SpaceUser;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.enums.SpaceRoleEnum;
-import com.yupi.yupicturebackend.model.vo.UserVO;
+import yupicture.interfaces.vo.user.UserVO;
 import com.yupi.yupicturebackend.model.vo.space.SpaceUserVO;
 import com.yupi.yupicturebackend.model.vo.space.SpaceVO;
 import com.yupi.yupicturebackend.service.SpaceService;
 import com.yupi.yupicturebackend.service.SpaceUserService;
-import com.yupi.yupicturebackend.mapper.SpaceUserMapper;
-import com.yupi.yupicturebackend.service.UserService;
+import yupicture.infrastructure.mapper.SpaceUserMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
+import static yupicture.infrastructure.exception.ErrorCode.PARAMS_ERROR;
 
 /**
  * @author Ayaki
@@ -44,7 +44,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
     @Lazy
     private SpaceService spaceService;
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
 
     /**
@@ -57,6 +57,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
     public Long addSpaceUser(SpaceUserAddRequest spaceUserAddRequest) {
         // 类型转换
         SpaceUser spaceUser = BeanUtil.copyProperties(spaceUserAddRequest, SpaceUser.class);
+        spaceUser.setSpaceRole(SpaceRoleEnum.VIEWER.getValue());
         // 参数校验
         validSpaceUser(spaceUser, true);
         // 数据库操作
@@ -117,7 +118,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         ThrowUtils.throwIf(ObjUtil.isEmpty(spaceUser), PARAMS_ERROR);
         validSpaceUser(spaceUser, true);
         // 获取用户信息和空间想象
-        User user = userService.getById(spaceUser.getUserId());
+        User user = userApplicationService.getUserById(spaceUser.getUserId());
         Space space = spaceService.getById(spaceUser.getSpaceId());
         // 转换类型
         UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
@@ -185,7 +186,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             // 用户是否存在
             Long userId = spaceUser.getUserId();
             ThrowUtils.throwIf(ObjUtil.isEmpty(userId) || userId <= 0, PARAMS_ERROR, "用户id不能为空");
-            User user = userService.getById(userId);
+            User user = userApplicationService.getUserById(userId);
             ThrowUtils.throwIf(ObjUtil.isEmpty(user), ErrorCode.NOT_FOUND_ERROR, "用户不存在");
             // 空间是否存在
             Long spaceId = spaceUser.getSpaceId();

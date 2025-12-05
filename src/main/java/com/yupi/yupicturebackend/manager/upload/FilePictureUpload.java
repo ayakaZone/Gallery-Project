@@ -2,24 +2,15 @@ package com.yupi.yupicturebackend.manager.upload;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpStatus;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.http.Method;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
+import yupicture.infrastructure.exception.ThrowUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
+import static yupicture.infrastructure.exception.ErrorCode.PARAMS_ERROR;
 
 @Service
 public class FilePictureUpload extends PictureUploadTemplate {

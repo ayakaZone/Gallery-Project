@@ -8,14 +8,15 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.yupicturebackend.api.aliyunai.AliYunAiApi;
-import com.yupi.yupicturebackend.api.aliyunai.model.CreateOutPaintingTaskRequest;
-import com.yupi.yupicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.yupi.yupicturebackend.common.DeleteRequest;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
-import com.yupi.yupicturebackend.manager.CosManager;
+import yupicture.application.service.UserApplicationService;
+import yupicture.infrastructure.api.aliyunai.AliYunAiApi;
+import yupicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import yupicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import yupicture.infrastructure.common.DeleteRequest;
+import yupicture.infrastructure.exception.BusinessException;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
+import yupicture.infrastructure.api.CosManager;
 import com.yupi.yupicturebackend.manager.upload.FilePictureUpload;
 import com.yupi.yupicturebackend.manager.upload.PictureUploadTemplate;
 import com.yupi.yupicturebackend.manager.upload.UrlPictureUpload;
@@ -23,14 +24,13 @@ import com.yupi.yupicturebackend.model.dto.file.UploadPictureResult;
 import com.yupi.yupicturebackend.model.dto.picture.*;
 import com.yupi.yupicturebackend.model.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.PictureVO;
-import com.yupi.yupicturebackend.model.vo.UserVO;
+import yupicture.interfaces.vo.user.UserVO;
 import com.yupi.yupicturebackend.service.PictureService;
-import com.yupi.yupicturebackend.mapper.PictureMapper;
+import yupicture.infrastructure.mapper.PictureMapper;
 import com.yupi.yupicturebackend.service.SpaceService;
-import com.yupi.yupicturebackend.service.UserService;
-import com.yupi.yupicturebackend.utils.ColorSimilarUtils;
+import yupicture.infrastructure.utils.ColorSimilarUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -66,7 +66,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     @Resource
     private UrlPictureUpload urlPictureUpload;
     @Autowired
-    private UserService userService;
+    private UserApplicationService userApplicationService;
     @Resource
     private CosManager cosManager;
     @Autowired
@@ -96,7 +96,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(ObjUtil.isEmpty(space), ErrorCode.NOT_FOUND_ERROR, "空间不存在");
             // 是否有权限
-            if (!user.getId().equals(space.getUserId()) && !userService.isAdmin(user)) {
+            if (!user.getId().equals(space.getUserId()) && !user.isAdmin()) {
                 ThrowUtils.throwIf(ObjUtil.isEmpty(space), ErrorCode.NO_AUTH_ERROR, "无权限上传图片到此空间");
             }
             // 校验空间数量是否超额
@@ -118,7 +118,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             Picture oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(ObjUtil.isEmpty(oldPicture), ErrorCode.PARAMS_ERROR);
             /// 仅本人与管理员可以编辑或更新图片
-            if (!oldPicture.getUserId().equals(user.getId()) && !userService.isAdmin(user)) {
+            if (!oldPicture.getUserId().equals(user.getId()) && !user.isAdmin()) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
             /// 指定编辑的图片空间是否是原图片所在的空间
@@ -265,8 +265,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             // Object objUser = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
             // User user = (User) objUser;
             // 获取用户信息-getById()
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getUserById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             pictureVO.setUser(userVO);
         }
         return pictureVO;
@@ -297,7 +297,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 获取 userId 集合
         Set<Long> userIdSet = records.stream().map(Picture::getUserId).collect(Collectors.toSet());
         // 可以使用 userId 匹配 user 的 map 集合
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream().collect(Collectors.groupingBy(User::getId));
+        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet).stream().collect(Collectors.groupingBy(User::getId));
         // 封装 pictureVOList 的 user信息
         pictureVOList.forEach(pictureVO -> {
             // 获得图片关联的 userId
@@ -308,7 +308,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                 user = userIdUserListMap.get(userId).get(0);
             }
             // 把 userVO 对象封装进 PictureVO 中
-            pictureVO.setUser(userService.getUserVO(user));
+            pictureVO.setUser(userApplicationService.getUserVO(user));
         });
         // 返回
         return pictureVOPage.setRecords(pictureVOList);
@@ -375,7 +375,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     @Override
     public void fillReviewParams(Picture picture, User loginUser) {
         // 管理员操作自动过审
-        if (userService.isAdmin(loginUser)) {
+        if (loginUser.isAdmin()) {
             picture.setReviewStatus(PASS.getValue());
             picture.setReviewMessage("管理员自动过审");
             picture.setReviewerId(loginUser.getId());
@@ -493,7 +493,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 //        // 公共图库
 //        if (ObjUtil.isEmpty(spaceId)) {
 //            // 仅本人和管理员可以对图片操作
-//            if (!picture.getUserId().equals(user.getId()) && !userService.isAdmin(user)) {
+//            if (!picture.getUserId().equals(user.getId()) && !userApplicationService.isAdmin(user)) {
 //                throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权操作此图片");
 //            }
 //        } else { // 私有空间

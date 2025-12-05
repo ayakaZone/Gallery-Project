@@ -8,33 +8,31 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.yupi.yupicturebackend.annotation.AuthCheck;
-import com.yupi.yupicturebackend.api.aliyunai.AliYunAiApi;
-import com.yupi.yupicturebackend.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.yupi.yupicturebackend.api.aliyunai.model.GetOutPaintingTaskResponse;
-import com.yupi.yupicturebackend.api.imagesearch.ImageSearchApiFacade;
-import com.yupi.yupicturebackend.api.imagesearch.model.ImageSearchResult;
-import com.yupi.yupicturebackend.auth.SpaceUserAuthManager;
-import com.yupi.yupicturebackend.auth.StpKit;
-import com.yupi.yupicturebackend.auth.annotation.SaSpaceCheckPermission;
-import com.yupi.yupicturebackend.auth.model.SpaceUserPermission;
-import com.yupi.yupicturebackend.auth.model.SpaceUserPermissionConstant;
-import com.yupi.yupicturebackend.common.BaseResponse;
-import com.yupi.yupicturebackend.common.DeleteRequest;
-import com.yupi.yupicturebackend.common.ResultUtils;
-import com.yupi.yupicturebackend.constant.UserConstant;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ErrorCode;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
+import yupicture.application.service.UserApplicationService;
+import yupicture.infrastructure.annotation.AuthCheck;
+import yupicture.infrastructure.api.aliyunai.AliYunAiApi;
+import yupicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import yupicture.infrastructure.api.aliyunai.model.GetOutPaintingTaskResponse;
+import yupicture.infrastructure.api.imagesearch.ImageSearchApiFacade;
+import yupicture.infrastructure.api.imagesearch.model.ImageSearchResult;
+import com.yupi.yupicturebackend.manager.auth.SpaceUserAuthManager;
+import com.yupi.yupicturebackend.manager.auth.StpKit;
+import com.yupi.yupicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
+import com.yupi.yupicturebackend.manager.auth.model.SpaceUserPermissionConstant;
+import yupicture.infrastructure.common.BaseResponse;
+import yupicture.infrastructure.common.DeleteRequest;
+import yupicture.infrastructure.common.ResultUtils;
+import yupicture.domain.user.constant.UserConstant;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.picture.*;
 import com.yupi.yupicturebackend.model.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
-import com.yupi.yupicturebackend.model.entity.User;
+import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.PictureTagCategory;
 import com.yupi.yupicturebackend.model.vo.PictureVO;
 import com.yupi.yupicturebackend.service.PictureService;
 import com.yupi.yupicturebackend.service.SpaceService;
-import com.yupi.yupicturebackend.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +61,7 @@ public class PictureController {
     private PictureService pictureService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -110,7 +108,7 @@ public class PictureController {
             @RequestPart("file") MultipartFile multipartFile,
             PictureUploadRequest pictureUploadRequest,
             HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
@@ -127,7 +125,7 @@ public class PictureController {
     public BaseResponse<PictureVO> uploadPictureByUrl(
             @RequestBody PictureUploadRequest pictureUploadRequest,
             HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         PictureVO pictureVO = pictureService.uploadPicture(pictureUploadRequest.getFileUrl(), pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
@@ -140,7 +138,7 @@ public class PictureController {
     public BaseResponse<Integer> uploadPictureByBatch(
             @RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(ObjUtil.isEmpty(pictureUploadByBatchRequest), ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         Integer result = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
         return ResultUtils.success(result);
     }
@@ -158,7 +156,7 @@ public class PictureController {
     public BaseResponse<Boolean> doReviewPicture(@RequestBody PictureReviewRequest pictureReviewRequest, HttpServletRequest request) {
         /// 校验
         ThrowUtils.throwIf(ObjUtil.isEmpty(pictureReviewRequest), ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.pictureReview(pictureReviewRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -177,7 +175,7 @@ public class PictureController {
         /// 校验
         ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0, ErrorCode.PARAMS_ERROR);
         // 解析参数
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.deletePicture(deleteRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -210,7 +208,7 @@ public class PictureController {
         Picture oldPicture = pictureService.getById(id);
         ThrowUtils.throwIf(ObjUtil.isEmpty(oldPicture), ErrorCode.NOT_FOUND_ERROR);
         // 补充审核参数
-        pictureService.fillReviewParams(picture, userService.getLoginUser(request));
+        pictureService.fillReviewParams(picture, userApplicationService.getLoginUser(request));
         // 更新图片
         boolean result = pictureService.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -341,12 +339,12 @@ public class PictureController {
                 boolean result = StpKit.SPACE.hasPermission(SpaceUserPermissionConstant.PICTURE_VIEW);
             ThrowUtils.throwIf(!result, ErrorCode.NO_AUTH_ERROR, "无权查看图片");
             /*Space space = spaceService.getById(spaceId);
-            User loginUser = userService.getLoginUser(request);
+            User loginUser = userApplicationService.getLoginUser(request);
             // 空间校验
                 ThrowUtils.throwIf(ObjUtil.isEmpty(space),
                     ErrorCode.NOT_FOUND_ERROR, "查询图片指定的空间不存在");
             // 权限校验
-            if (!loginUser.getId().equals(space.getUserId()) && !userService.isAdmin(loginUser)) {
+            if (!loginUser.getId().equals(space.getUserId()) && !userApplicationService.isAdmin(loginUser)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有查看该图片所在空间的权限");
             }*/
         }
@@ -386,14 +384,14 @@ public class PictureController {
             ThrowUtils.throwIf(ObjUtil.isEmpty(space),
                     ErrorCode.NOT_FOUND_ERROR, "查询图片指定的空间不存在");*/
             // 校验权限
-            /*if (!picture.getUserId().equals(userService.getLoginUser(request).getId())) {
+            /*if (!picture.getUserId().equals(userApplicationService.getLoginUser(request).getId())) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权获得此图片");
             }*/
         } else { // 公共图库
             // 校验图片的审核状态
             ThrowUtils.throwIf(!picture.getReviewStatus().equals(PASS.getValue()), ErrorCode.PARAMS_ERROR, "仅能获取已过审图片");
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         // 转VO
         PictureVO pictureVO = pictureService.getPictureVO(picture, request);
@@ -416,7 +414,7 @@ public class PictureController {
         ThrowUtils.throwIf(
                 ObjUtil.isEmpty(pictureEditRequest) || pictureEditRequest.getId() <= 0,
                 ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.editPicture(pictureEditRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -437,7 +435,7 @@ public class PictureController {
         // 获取参数
         Long spaceId = searchPictureByColorRequest.getSpaceId();
         String pictureColor = searchPictureByColorRequest.getPicColor();
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<PictureVO> result = pictureService.searchPictureByColor(spaceId, pictureColor, loginUser);
         return ResultUtils.success(result);
     }
@@ -456,7 +454,7 @@ public class PictureController {
             @RequestBody PictureEditByBatchRequest pictureEditByBatchRequest, HttpServletRequest request) {
         // 校验参数
         ThrowUtils.throwIf(ObjUtil.isEmpty(pictureEditByBatchRequest), ErrorCode.PARAMS_ERROR, "参数错误");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -497,7 +495,7 @@ public class PictureController {
             @RequestBody CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, HttpServletRequest request) {
         // 校验参数
         ThrowUtils.throwIf(ObjUtil.isEmpty(createPictureOutPaintingTaskRequest), ErrorCode.PARAMS_ERROR, "参数错误");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 调用创建扩图任务的服务
         CreateOutPaintingTaskResponse response = pictureService.createPictureOutPaintingTask
                 (createPictureOutPaintingTaskRequest, loginUser);

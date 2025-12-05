@@ -7,8 +7,8 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.exception.ThrowUtils;
+import yupicture.infrastructure.exception.BusinessException;
+import yupicture.infrastructure.exception.ThrowUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
+import static yupicture.infrastructure.exception.ErrorCode.PARAMS_ERROR;
 
 @Service
 public class UrlPictureUpload extends PictureUploadTemplate {

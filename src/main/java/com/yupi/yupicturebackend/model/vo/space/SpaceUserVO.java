@@ -2,19 +2,15 @@ package com.yupi.yupicturebackend.model.vo.space;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.yupi.yupicturebackend.exception.BusinessException;
-import com.yupi.yupicturebackend.model.entity.Space;
+import yupicture.infrastructure.exception.BusinessException;
 import com.yupi.yupicturebackend.model.entity.SpaceUser;
-import com.yupi.yupicturebackend.model.vo.UserVO;
-import io.github.classgraph.json.Id;
+import yupicture.interfaces.vo.user.UserVO;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
 
-import static com.yupi.yupicturebackend.exception.ErrorCode.PARAMS_ERROR;
+import static yupicture.infrastructure.exception.ErrorCode.PARAMS_ERROR;
 
 /**
  * 用户视图（脱敏）

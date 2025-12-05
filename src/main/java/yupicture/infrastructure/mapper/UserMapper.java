@@ -1,0 +1,18 @@
+package yupicture.infrastructure.mapper;
+
+import yupicture.domain.user.entity.User;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+/**
+* @author Ayaki
+* @description 针对表【user(用户)】的数据库操作Mapper
+* @createDate 2025-11-21 22:29:53
+* @Entity yupicture.domain.entity.User
+*/
+public interface UserMapper extends BaseMapper<User> {
+
+}
+
+
+
+
