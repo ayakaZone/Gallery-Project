@@ -1,12 +1,12 @@
 package com.yupi.yupicturebackend.controller;
 
 import cn.hutool.core.util.ObjUtil;
+import com.yupi.yupicturebackend.model.dto.space.analyze.*;
 import yupicture.application.service.UserApplicationService;
 import yupicture.infrastructure.common.BaseResponse;
 import yupicture.infrastructure.common.ResultUtils;
 import yupicture.infrastructure.exception.ErrorCode;
 import yupicture.infrastructure.exception.ThrowUtils;
-import com.yupi.yupicturebackend.model.dto.analyze.*;
 import com.yupi.yupicturebackend.model.entity.Space;
 import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.analyze.*;

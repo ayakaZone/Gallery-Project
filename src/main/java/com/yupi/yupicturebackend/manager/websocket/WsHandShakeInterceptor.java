@@ -3,12 +3,12 @@ package com.yupi.yupicturebackend.manager.websocket;
 import cn.hutool.core.util.ObjUtil;
 import com.yupi.yupicturebackend.manager.auth.SpaceUserAuthManager;
 import com.yupi.yupicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.yupi.yupicturebackend.model.entity.Picture;
+import yupicture.domain.picture.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
 import yupicture.application.service.UserApplicationService;
 import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.enums.SpaceTypeEnum;
-import com.yupi.yupicturebackend.service.PictureService;
+import yupicture.application.service.PictureApplicationService;
 import com.yupi.yupicturebackend.service.SpaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
@@ -31,7 +31,7 @@ public class WsHandShakeInterceptor implements HandshakeInterceptor {
     private UserApplicationService userApplicationService;
 
     @Resource
-    private PictureService pictureService;
+    private PictureApplicationService pictureApplicationService;
     @Resource
     private SpaceService spaceService;
     @Resource
@@ -57,7 +57,7 @@ public class WsHandShakeInterceptor implements HandshakeInterceptor {
                 return false;
             }
             // 校验图片
-            Picture picture = pictureService.getById(pictureId);
+            Picture picture = pictureApplicationService.getPictureById(pictureId);
             if (ObjUtil.isEmpty(picture)) {
                 log.error("图片不存在，拒绝建立连接");
                 return false;

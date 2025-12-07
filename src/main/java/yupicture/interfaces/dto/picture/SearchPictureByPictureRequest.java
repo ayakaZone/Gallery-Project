@@ -1,9 +1,8 @@
-package com.yupi.yupicturebackend.model.dto.picture;
+package yupicture.interfaces.dto.picture;
 
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 public class SearchPictureByPictureRequest implements Serializable {

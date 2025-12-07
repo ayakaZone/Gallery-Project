@@ -1,14 +1,15 @@
-package com.yupi.yupicturebackend.service;
+package yupicture.application.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import yupicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import yupicture.infrastructure.common.DeleteRequest;
-import com.yupi.yupicturebackend.model.dto.picture.*;
-import com.yupi.yupicturebackend.model.entity.Picture;
-import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.scheduling.annotation.Async;
+import yupicture.domain.picture.entity.Picture;
 import yupicture.domain.user.entity.User;
-import com.yupi.yupicturebackend.model.vo.PictureVO;
+import yupicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import yupicture.infrastructure.api.imagesearch.model.ImageSearchResult;
+import yupicture.infrastructure.common.DeleteRequest;
+import yupicture.interfaces.dto.picture.*;
+import yupicture.interfaces.vo.picture.PictureVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -18,10 +19,11 @@ import java.util.List;
  * @description 针对表【picture(图片)】的数据库操作Service
  * @createDate 2025-11-23 10:59:13
  */
-public interface PictureService extends IService<Picture> {
+public interface PictureApplicationService {
 
     /**
      * 图片上传
+     *
      * @param inputSource
      * @param pictureUploadRequest
      * @param user
@@ -39,6 +41,7 @@ public interface PictureService extends IService<Picture> {
 
     /**
      * Picture PO 转 VO
+     *
      * @param picture
      * @param request
      * @return
@@ -47,6 +50,7 @@ public interface PictureService extends IService<Picture> {
 
     /**
      * Picture分页PO转VO
+     *
      * @param picturePage
      * @param request
      * @return
@@ -54,7 +58,8 @@ public interface PictureService extends IService<Picture> {
     Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request);
 
     /**
-     * 图片校验
+     * 校验图片
+     *
      * @param picture
      */
     void validPicture(Picture picture);
@@ -65,7 +70,7 @@ public interface PictureService extends IService<Picture> {
      * @param pictureReviewRequest
      * @param loginUser
      */
-    void    pictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
+    void pictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
 
     /**
      * 填充审核参数
@@ -85,26 +90,16 @@ public interface PictureService extends IService<Picture> {
     Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser);
 
     /**
-     * 清理COS对象存储中的过期图片
-     */
-    void clearPictureFile(Picture picture);
-
-    /**
-     * 图片操作权限校验——已使用Sa-Token完成权限校验
-     * @param user
-     * @param picture
-     */
-/*    void checkPictureAuth(User user, Picture picture);*/
-
-    /**
      * 用户图片编辑
-     * @param pictureEditRequest
+     *
+     * @param picture
      * @param loginUser
      */
-    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+    void editPicture(Picture picture, User loginUser);
 
     /**
      * 用户管理员删除图片
+     *
      * @param deleteRequest
      * @param loginUser
      */
@@ -134,4 +129,60 @@ public interface PictureService extends IService<Picture> {
      * @return
      */
     CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest request, User loginUser);
+
+    /**
+     * 管理员更新图片
+     *
+     * @param picture
+     * @param loginUser
+     */
+    void updatePicture(Picture picture, User loginUser);
+
+    /**
+     * 根据id获取图片
+     *
+     * @param id
+     * @return
+     */
+    Picture getPictureById(long id);
+
+    /**
+     * 获取图片列表
+     *
+     * @param pictureQueryRequest
+     * @return
+     */
+    Page<Picture> getListPictureByPage(PictureQueryRequest pictureQueryRequest);
+
+    /**
+     * 获取图片列表VO
+     *
+     * @param pictureQueryRequest
+     * @param request
+     * @return
+     */
+    Page<PictureVO> getListPictureVOByPage(PictureQueryRequest pictureQueryRequest, HttpServletRequest request);
+
+    /**
+     * 获取图片VO
+     * @param id
+     * @param request
+     * @return
+     */
+    PictureVO getPictureVOById(long id, HttpServletRequest request);
+
+    /**
+     * 图片搜索
+     * @param searchPictureByPictureRequest
+     * @return
+     */
+    List<ImageSearchResult> searchPictureByPicture(SearchPictureByPictureRequest searchPictureByPictureRequest);
+
+    /**
+     * 获取图片列表VO
+     * @param pictureQueryRequest
+     * @param request
+     * @return
+     */
+    Page<PictureVO> getListPictureVOByPageWithCache(PictureQueryRequest pictureQueryRequest, HttpServletRequest request);
 }

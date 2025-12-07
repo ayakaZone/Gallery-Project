@@ -3,7 +3,7 @@ package com.yupi.yupicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import com.yupi.yupicturebackend.model.dto.analyze.*;
+import com.yupi.yupicturebackend.model.dto.space.analyze.*;
 import com.yupi.yupicturebackend.model.entity.Space;
 import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.analyze.*;

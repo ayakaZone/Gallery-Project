@@ -1,6 +1,6 @@
 package com.yupi.yupicturebackend.manager.auth;
 
-import com.yupi.yupicturebackend.model.entity.Picture;
+import yupicture.domain.picture.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.SpaceUser;
 import lombok.Data;

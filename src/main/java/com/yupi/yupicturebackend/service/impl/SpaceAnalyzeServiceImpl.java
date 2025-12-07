@@ -4,17 +4,18 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yupi.yupicturebackend.model.dto.space.analyze.*;
 import yupicture.application.service.UserApplicationService;
+import yupicture.domain.picture.repository.PictureRepository;
 import yupicture.infrastructure.exception.BusinessException;
 import yupicture.infrastructure.exception.ErrorCode;
 import yupicture.infrastructure.exception.ThrowUtils;
 import yupicture.infrastructure.mapper.SpaceMapper;
-import com.yupi.yupicturebackend.model.dto.analyze.*;
-import com.yupi.yupicturebackend.model.entity.Picture;
+import yupicture.domain.picture.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
 import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.vo.space.analyze.*;
-import com.yupi.yupicturebackend.service.PictureService;
+import yupicture.application.service.PictureApplicationService;
 import com.yupi.yupicturebackend.service.SpaceAnalyzeService;
 import com.yupi.yupicturebackend.service.SpaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,9 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
     @Resource
     private SpaceService spaceService;
     @Autowired
-    private PictureService pictureService;
+    private PictureApplicationService pictureApplicationService;
+    @Resource
+    private PictureRepository pictureRepository;
 
     /**
      * 查询空间使用分析
@@ -68,7 +71,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
             // 设置查询字段
             queryWrapper.select("picSize");
             // 查询数据库
-            List<Object> pictureObjList = pictureService.getBaseMapper().selectObjs(queryWrapper);
+            List<Object> pictureObjList = pictureRepository.getBaseMapper().selectObjs(queryWrapper);
             // 转换数据类型并统计使用总大小
             long usedSize = pictureObjList.stream().mapToLong(result -> result instanceof Number ? ((Long) result) : 0).sum();
             // 统计使用总数量
@@ -130,7 +133,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
         // 设置查询字段、并按标签分组统计数量和大小
         queryWrapper.select("category AS category", "COUNT(*) AS count", "SUM(picSize) AS totalSize").groupBy("category");
         // 查询数据库
-        List<Map<String, Object>> maps = pictureService.getBaseMapper().selectMaps(queryWrapper);
+        List<Map<String, Object>> maps = pictureRepository.getBaseMapper().selectMaps(queryWrapper);
         // 流处理封装为响应类
         List<SpaceCategoryAnalyzeResponse> list = maps.stream().map(result -> {
             String category = result.get("category") != null ? result.get("category").toString() : "未分类";
@@ -159,7 +162,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
         // 设置查询字段
         queryWrapper.select("tags");
         // 查询数据库
-        List<Object> objectList = pictureService.getBaseMapper().selectObjs(queryWrapper);
+        List<Object> objectList = pictureRepository.getBaseMapper().selectObjs(queryWrapper);
         // 过滤无效数据，转换数据类型
         List<String> stringList = objectList.stream().filter(ObjUtil::isNotNull).map(Object::toString).collect(Collectors.toList());
         // Json转字符串，统计标签次数，标签去重
@@ -186,7 +189,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
         // 设置查询字段
         queryWrapper.select("picSize");
         // 查询数据库
-        List<Long> pictureSizeList = pictureService.getBaseMapper().selectObjs(queryWrapper).stream().map(size -> ((Number) size).longValue()).collect(Collectors.toList());
+        List<Long> pictureSizeList = pictureRepository.getBaseMapper().selectObjs(queryWrapper).stream().map(size -> ((Number) size).longValue()).collect(Collectors.toList());
         // 创建一个Map，用于存储图片大小范围及对应的图片数量
         Map<String, Long> pictureSizeMap = new LinkedHashMap<>();
         // 按图片大小的范围分段过滤数据
@@ -234,7 +237,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space> imp
         // 设置分组排序条件
         queryWrapper.groupBy("period").orderByAsc("period");
         // 查询数据库
-        List<Map<String, Object>> maps = pictureService.getBaseMapper().selectMaps(queryWrapper);
+        List<Map<String, Object>> maps = pictureRepository.getBaseMapper().selectMaps(queryWrapper);
         // 封装为响应对象，返回结果
         List<SpaceUserAnalyzeResponse> list = maps.stream().map(map -> {
             String period = map.get("period").toString();

@@ -11,16 +11,16 @@ import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
 import cn.hutool.json.JSONUtil;
 import com.yupi.yupicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import yupicture.application.service.UserApplicationService;
+import yupicture.domain.picture.repository.PictureRepository;
 import yupicture.infrastructure.exception.BusinessException;
 import yupicture.infrastructure.exception.ErrorCode;
-import com.yupi.yupicturebackend.model.entity.Picture;
+import yupicture.domain.picture.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.SpaceUser;
 import yupicture.domain.user.entity.User;
 import com.yupi.yupicturebackend.model.enums.SpaceRoleEnum;
 import com.yupi.yupicturebackend.model.enums.SpaceTypeEnum;
-import com.yupi.yupicturebackend.service.PictureService;
+import yupicture.application.service.PictureApplicationService;
 import com.yupi.yupicturebackend.service.SpaceService;
 import com.yupi.yupicturebackend.service.SpaceUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +44,14 @@ public class StpInterfaceImpl implements StpInterface {
 
     @Resource
     private SpaceUserAuthManager spaceUserAuthManager;
-    @Autowired
+    @Resource
     private SpaceUserService spaceUserService;
-    @Autowired
-    private PictureService pictureService;
-    @Autowired
+    @Resource
+    private PictureApplicationService pictureApplicationService;
+    @Resource
     private SpaceService spaceService;
-
+    @Resource
+    private PictureRepository pictureRepository;
 
     /**
      * 返回一个账号所拥有的权限码集合
@@ -112,7 +113,7 @@ public class StpInterfaceImpl implements StpInterface {
                 return ADMIN_PERMISSIONS;
             }
             // 根据 pictureId 查询 picture
-            Picture picture = pictureService.lambdaQuery()
+            Picture picture = pictureRepository.lambdaQuery()
                     .eq(Picture::getId, pictureId)
                     .select(Picture::getId, Picture::getSpaceId, Picture::getUserId)
                     .one();

@@ -1,11 +1,15 @@
-package com.yupi.yupicturebackend.model.entity;
+package yupicture.domain.picture.entity;
 
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
 
 import lombok.Data;
+import yupicture.infrastructure.exception.ErrorCode;
+import yupicture.infrastructure.exception.ThrowUtils;
 
 /**
  * 图片
@@ -135,4 +139,22 @@ public class Picture implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 图片校验
+     */
+    public void validPicture() {
+        // 从对象中取值
+        Long id = this.getId();
+        String url = this.getUrl();
+        String introduction = this.getIntroduction();
+        // 修改数据时，id 不能为空，有参数则校验
+        ThrowUtils.throwIf(ObjUtil.isNull(id), ErrorCode.PARAMS_ERROR, "id 不能为空");
+        if (StrUtil.isNotBlank(url)) {
+            ThrowUtils.throwIf(url.length() > 1024, ErrorCode.PARAMS_ERROR, "url 过长");
+        }
+        if (StrUtil.isNotBlank(introduction)) {
+            ThrowUtils.throwIf(introduction.length() > 800, ErrorCode.PARAMS_ERROR, "简介过长");
+        }
+    }
 }

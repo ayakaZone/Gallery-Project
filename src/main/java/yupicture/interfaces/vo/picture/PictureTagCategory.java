@@ -1,4 +1,4 @@
-package com.yupi.yupicturebackend.model.vo;
+package yupicture.interfaces.vo.picture;
 
 import lombok.Data;
 

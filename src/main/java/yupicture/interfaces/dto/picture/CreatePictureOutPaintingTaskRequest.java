@@ -1,4 +1,4 @@
-package com.yupi.yupicturebackend.model.dto.picture;
+package yupicture.interfaces.dto.picture;
 
 import yupicture.infrastructure.api.aliyunai.model.CreateOutPaintingTaskRequest;
 import lombok.Data;

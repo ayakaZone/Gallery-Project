@@ -1,4 +1,4 @@
-package com.yupi.yupicturebackend.model.dto.picture;
+package yupicture.interfaces.dto.picture;
 
 import lombok.Data;
 
@@ -6,20 +6,25 @@ import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class PictureEditByBatchRequest implements Serializable {
+public class PictureEditRequest implements Serializable {
 
 
     private static final long serialVersionUID = -7502219825472679547L;
 
     /**
-     * 空间ID
+     * id
      */
-    private Long spaceId;
+    private Long id;
 
     /**
-     * 图片ID列表
+     * 图片名称
      */
-    private List<Long> pictureIdList;
+    private String name;
+
+    /**
+     * 简介
+     */
+    private String introduction;
 
     /**
      * 分类
@@ -30,9 +35,4 @@ public class PictureEditByBatchRequest implements Serializable {
      * 标签
      */
     private List<String> tags;
-
-    /**
-     * 命名规则
-     */
-    private String nameRule;
 }

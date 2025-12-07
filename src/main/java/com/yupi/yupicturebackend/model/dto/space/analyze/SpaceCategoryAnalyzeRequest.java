@@ -1,4 +1,4 @@
-package com.yupi.yupicturebackend.model.dto.analyze;
+package com.yupi.yupicturebackend.model.dto.space.analyze;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

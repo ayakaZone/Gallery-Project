@@ -1,11 +1,11 @@
-package com.yupi.yupicturebackend.model.vo;
+package yupicture.interfaces.vo.picture;
 
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
 import yupicture.infrastructure.exception.BusinessException;
-import com.yupi.yupicturebackend.model.entity.Picture;
+import yupicture.domain.picture.entity.Picture;
 import lombok.Data;
 import yupicture.interfaces.vo.user.UserVO;
 
