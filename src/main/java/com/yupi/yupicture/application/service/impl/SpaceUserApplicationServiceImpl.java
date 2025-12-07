@@ -199,7 +199,7 @@ public class SpaceUserApplicationServiceImpl implements SpaceUserApplicationServ
         List<SpaceUser> list = spaceUserDomainService.listSpaceUser(queryWrapper);
         // 封装VO列表
         List<SpaceUserVO> spaceUserVOList = this.getSpaceUserVOList(list);
-        ThrowUtils.throwIf(CollUtil.isEmpty(spaceUserVOList), ErrorCode.NOT_FOUND_ERROR);
+//        ThrowUtils.throwIf(CollUtil.isEmpty(spaceUserVOList), ErrorCode.NOT_FOUND_ERROR);
         return spaceUserVOList;
     }
 
