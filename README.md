@@ -48,7 +48,6 @@
   - 对象存储与 AI 能力配置在：
     - `yu-picture-backend/src/main/resources/application-local.yml`
     - `yu-picture-backend-ddd/src/main/resources/application-local.yml`
-    - 请将其中的腾讯云 COS、阿里云 AI 等密钥替换为你自己的密钥，**不要将真实密钥提交到公共仓库**。
 
 ## 快速开始
 
